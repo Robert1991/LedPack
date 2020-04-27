@@ -1,7 +1,52 @@
 #include "gyroscope.h"
+#include "microphone.h"
+#include "lowPassFilter.h"
+#include "lowPassSampler.h"
 #include "shiftregister.h"
 #include "Wire.h"
 
+
+bool alreadyTurnedOn(int *turnedOn, int arrayLength, int ledIndex) {
+  for (int i = 0; i < arrayLength; i++) {
+    if (turnedOn[i] == ledIndex) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+void turnOnLedsOnHeartRandomly(int minLedsTurnedOn) {
+  if (minLedsTurnedOn <= 14) {
+    int numberOfLedsTurnedOn = minLedsTurnedOn + ( rand() % ( 14 - minLedsTurnedOn + 1 ) );
+    int turnedOnLeds[numberOfLedsTurnedOn];
+
+    for (int i = 0; i < numberOfLedsTurnedOn; i++) {
+      int nextLed = rand() % 14;
+      while (alreadyTurnedOn(turnedOnLeds, numberOfLedsTurnedOn, nextLed)) {
+        nextLed = rand() % 14;
+      }
+      turnedOnLeds[i] = nextLed;
+    }
+
+    shiftRegister1.turnOffAll();
+    shiftRegister2.turnOffAll();
+
+    for (int i = 0; i < sizeof(turnedOnLeds); i++) {
+      int turnedOnLedIndex = turnedOnLeds[i];
+
+      if (turnedOnLedIndex >= 7) {
+        shiftRegister2.turnOn(turnedOnLedIndex - 7);
+      } else {
+        shiftRegister1.turnOn(turnedOnLedIndex);
+      }
+    }
+  }
+}
+
+
+// LED heart actor initialization
 class Register1ColumnActivator : public ColumnActivator {
   public:
     void turnOnColumn(int column, Led *leds) {
@@ -146,13 +191,38 @@ class Register2LevelActivator : public LevelActivator {
     }
 };
 
+Led ledsOnShiftRegister1[7] = {
+  Led(1, 6),
+  Led(2, 0),
+  Led(3, 1),
+  Led(4, 2),
+  Led(5, 3),
+  Led(6, 4),
+  Led(7, 5)
+};
 
+Led ledsOnShiftRegister2[7] = {
+  Led(1, 2),
+  Led(2, 1),
+  Led(3, 0),
+  Led(4, 3),
+  Led(5, 4),
+  Led(6, 5),
+  Led(7, 6)
+};
+
+LedShiftRegisterPins shiftRegister1Pins = { 10, 11, 8, 9 };
+LedShiftRegisterPins shiftRegister2Pins = { 5, 6, 4, 3 };
+LedShiftRegister shiftRegister1 = LedShiftRegister(shiftRegister1Pins, ledsOnShiftRegister1, new Register1LevelActivator(), new Register1ColumnActivator());
+LedShiftRegister shiftRegister2 = LedShiftRegister(shiftRegister2Pins, ledsOnShiftRegister2, new Register2LevelActivator(), new Register2ColumnActivator());
+
+// Gyroscope
 class LedBrightnessAccelerationRatioMapper : public IAccelerationRatioMapper {
   private:
     const int MAX_BRIGHTNESS = 255;
     int ledBrightnessMagnifier;
     int magnifierThreshold;
-    
+
   public:
     LedBrightnessAccelerationRatioMapper(int ledBrightnessMagnifier, int magnifierThreshold) {
       this -> ledBrightnessMagnifier = ledBrightnessMagnifier;
@@ -174,117 +244,83 @@ class LedBrightnessAccelerationRatioMapper : public IAccelerationRatioMapper {
     }
 };
 
-Led ledsOnShiftRegister1[7] = {
-  Led(1, 6),
-  Led(2, 0),
-  Led(3, 1),
-  Led(4, 2),
-  Led(5, 3),
-  Led(6, 4),
-  Led(7, 5)
-};
-
-Led ledsOnShiftRegister2[7] = {
-  Led(1, 2),
-  Led(2, 1),
-  Led(3, 0),
-  Led(4, 3),
-  Led(5, 4),
-  Led(6, 5),
-  Led(7, 6)
-};
-
-const int MICROPHONE_ANALOG_INPUT_PIN = A1;
-const int MICROPHONE_ENABLED_PIN = 12;
-
-LedShiftRegisterPins shiftRegister1Pins = { 10, 11, 8, 9 };
-LedShiftRegisterPins shiftRegister2Pins = { 5, 6, 4, 3 };
-
-LedShiftRegister shiftRegister1 = LedShiftRegister(shiftRegister1Pins, ledsOnShiftRegister1, new Register1LevelActivator(), new Register1ColumnActivator());
-LedShiftRegister shiftRegister2 = LedShiftRegister(shiftRegister2Pins, ledsOnShiftRegister2, new Register2LevelActivator(), new Register2ColumnActivator());
-
+const float changeLightsThreshold = 12000.0;
 const int MPU_ADDR = 0x68; // I2C address of the MPU-6050. If AD0 pin is set to HIGH, the I2C address will be 0x69.
 Gyroscope gyroScope = Gyroscope(MPU_ADDR);
-IAccelerationRatioMapper *accelerationBrightnessMapper = new LedBrightnessAccelerationRatioMapper(50, 10);
-
+IAccelerationRatioMapper *accelerationBrightnessMapper = new LedBrightnessAccelerationRatioMapper(35, 10);
 AccelerationMeasurementVector currentAcceleration = AccelerationMeasurementVector::defaultVector();
 AccelerationMeasurementVector formerAcceleration = AccelerationMeasurementVector::defaultVector();
 
-float changeLightsThreshold = 10000.0;
 
-bool alreadyTurnedOn(int *turnedOn, int arrayLength, int ledIndex) {
-  for (int i = 0; i < arrayLength; i++) {
-    if (turnedOn[i] == ledIndex) {
-      return true;
-    }
-  }
+// Bass filter initialization
+const int MICROPHONE_ANALOG_INPUT_PIN = A1;
+const int MICROPHONE_ENABLED_PIN = 12;
+const int samplesN = 25;
 
-  return false;
-}
+Microphone* microphone = new Microphone(MICROPHONE_ANALOG_INPUT_PIN, MICROPHONE_ENABLED_PIN);
+ILowPassFilter* lowPassFilter = new IntegerBasedLowPassFilter();
+LowPassSampler* lowPassSampler = new LowPassSampler(microphone, lowPassFilter, 1000);
 
 void setup()
 {
-  pinMode(MICROPHONE_ENABLED_PIN, INPUT);
+  microphone -> init();
 
   shiftRegister1.initializePins();
   shiftRegister2.initializePins();
-  
+
   gyroScope.wakeUp();
-  
+
   currentAcceleration = gyroScope.measureAcceleration();
   formerAcceleration = gyroScope.measureAcceleration();
+
+  shiftRegister1.turnOnAll();
+  shiftRegister2.turnOnAll();
+  
   Serial.begin(9600);
 }
 
-
 void loop()
 {
+  bassFilterShow();
+  //movementShow();
+  //soundShow();
+  //lightShow();
+}
+
+void bassFilterShow() {
+  int lvl = lowPassSampler -> read(samplesN);
+  if (lvl > 750) {
+    float brightnessFactor = lvl / 1023.0;
+    shiftRegister1.toggleBrightness((brightnessFactor * 255));
+    shiftRegister2.toggleBrightness((brightnessFactor * 255));
+    turnOnLedsOnHeartRandomly(7);
+  } else {
+    shiftRegister1.toggleBrightness(0);
+    shiftRegister2.toggleBrightness(0);
+  }
+}
+
+void movementShow() {
   currentAcceleration = gyroScope.measureAcceleration();
   AccerlationVectorDifference vectorDifference = currentAcceleration.euclideanDistanceTo2(formerAcceleration);
   shiftRegister1.toggleBrightness(vectorDifference.mapAccelerationRatioTo(accelerationBrightnessMapper));
   shiftRegister2.toggleBrightness(vectorDifference.mapAccelerationRatioTo(accelerationBrightnessMapper));
-  
+
   if (vectorDifference.overThreshold(changeLightsThreshold)) {
-    int numberOfLedsTurnedOn = 4 + ( rand() % ( 14 - 4 + 1 ) );
-    int turnedOnLeds[numberOfLedsTurnedOn];
-
-    for (int i = 0; i < numberOfLedsTurnedOn; i++) {
-      int nextLed = rand() % 14;
-      while (alreadyTurnedOn(turnedOnLeds, numberOfLedsTurnedOn, nextLed)) {
-        nextLed = rand() % 14;
-      }
-      turnedOnLeds[i] = nextLed;
-    }
-
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-
-    for (int i = 0; i < sizeof(turnedOnLeds); i++) {
-      int turnedOnLedIndex = turnedOnLeds[i];
-
-      if (turnedOnLedIndex >= 7) {
-        shiftRegister2.turnOn(turnedOnLedIndex - 7);
-      } else {
-        shiftRegister1.turnOn(turnedOnLedIndex);
-      }
-    }
+    turnOnLedsOnHeartRandomly(4);
   }
 
   delay(10);
   formerAcceleration = currentAcceleration;
 
-  //soundShow();
-  //lightShow();
 }
 
 void soundShow() {
   int Analog;
   int Digital;
 
-  //Aktuelle Werte werden ausgelesen, auf den Spannungswert konvertiert...
-  Analog = analogRead (MICROPHONE_ANALOG_INPUT_PIN); //* (5.0 / 1023.0);
-  Digital = digitalRead(MICROPHONE_ENABLED_PIN);
-  //... und an dieser Stelle ausgegeben
+  Analog = microphone -> readAnalog();
+  Digital = microphone -> readDigital();
 
   if (Digital == HIGH) {
     shiftRegister1.turnOnAll();
