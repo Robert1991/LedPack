@@ -258,8 +258,12 @@ const int MICROPHONE_ENABLED_PIN = 12;
 const int samplesN = 25;
 
 Microphone* microphone = new Microphone(MICROPHONE_ANALOG_INPUT_PIN, MICROPHONE_ENABLED_PIN);
-ILowPassFilter* lowPassFilter = new IntegerBasedLowPassFilter();
-LowPassSampler* lowPassSampler = new LowPassSampler(microphone, lowPassFilter, 1000);
+
+ILowPassFilter* floatlowPassFilter = new FloatBasedLowPassFilter();
+LowPassSampler* floatLowPassSampler = new LowPassSampler(microphone, floatlowPassFilter, 1000);
+
+//ILowPassFilter* lowPassFilter = new IntegerBasedLowPassFilter();
+//LowPassSampler lowPassSampler = LowPassSampler(microphone, lowPassFilter, 1000);
 
 void setup()
 {
@@ -288,12 +292,13 @@ void loop()
 }
 
 void bassFilterShow() {
-  int lvl = lowPassSampler -> read(samplesN);
+  int lvl = floatLowPassSampler -> read(samplesN);
   if (lvl > 750) {
     float brightnessFactor = lvl / 1023.0;
     shiftRegister1.toggleBrightness((brightnessFactor * 255));
     shiftRegister2.toggleBrightness((brightnessFactor * 255));
-    turnOnLedsOnHeartRandomly(7);
+
+    turnOnLedsOnHeartRandomly(2);
   } else {
     shiftRegister1.toggleBrightness(0);
     shiftRegister2.toggleBrightness(0);

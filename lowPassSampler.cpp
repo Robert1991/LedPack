@@ -18,8 +18,7 @@ int LowPassSampler::readPeakFrom(int samples) {
   int peak = 0;
   for (int k = 0; k < samples; k++) {
     int val = this -> microphone -> readAnalog();
-    this -> lowPassFilter ->put(val);
-
+    this -> lowPassFilter -> put(val);
     int filtered = lowPassFilter->get();
     peak = max(peak, filtered);
   }
@@ -34,4 +33,12 @@ void LowPassSampler::applyToVolumeIfNecassary() {
     this -> minPeak = 1023;
     calledInCurrentIteration = 0;
   }
+}
+
+float LowPassSampler::detectFilterFrequency(int samples) {
+  long start = millis();
+  readPeakFrom(samples);
+  long end = millis();
+  float freq = ((float)samples * (float)1000) / ((float)end - (float)start);
+  return freq;
 }
