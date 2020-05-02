@@ -6,6 +6,10 @@ LowPassSampler::LowPassSampler(Microphone *microphone, ILowPassFilter *lowPassFi
   this -> applyToVolumneIterations = applyToVolumneIterations;
 }
 
+void LowPassSampler::initializeMicrophone() {
+  this -> microphone -> init();
+}
+
 int LowPassSampler::read(int samplingRate) {
   applyToVolumeIfNecassary();
   int peak = readPeakFrom(samplingRate);

@@ -217,21 +217,19 @@ IAccelerationRatioMapper *accelerationBrightnessMapper = new LedBrightnessAccele
 AccelerationMeasurementVector currentAcceleration = AccelerationMeasurementVector::defaultVector();
 AccelerationMeasurementVector formerAcceleration = AccelerationMeasurementVector::defaultVector();
 
-
 // Bass filter initialization
 const int MICROPHONE_ANALOG_INPUT_PIN = A1;
 const int MICROPHONE_ENABLED_PIN = 12;
 const int samplesN = 25;
-
-Microphone* microphone = new Microphone(MICROPHONE_ANALOG_INPUT_PIN, MICROPHONE_ENABLED_PIN);
-
-ILowPassFilter* floatlowPassFilter = new FloatBasedLowPassFilter();
-LowPassSampler* floatLowPassSampler = new LowPassSampler(microphone, floatlowPassFilter, 1000);
-
+const int applyToVolumneIterations = 1000;
+LowPassSampler* floatLowPassSampler = new LowPassSampler(new Microphone(MICROPHONE_ANALOG_INPUT_PIN, MICROPHONE_ENABLED_PIN), 
+                                                         new FloatBasedLowPassFilter(), 
+                                                         applyToVolumneIterations);
+                                                         
 void setup()
 {
   Serial.begin(9600);
-  microphone -> init();
+  floatLowPassSampler -> initializeMicrophone();
   ledHeart.initialize();
   gyroScope.wakeUp();
 
@@ -243,8 +241,8 @@ void setup()
 
 void loop()
 {
-  //bassFilterShow();
-  movementShow();
+  bassFilterShow();
+  //movementShow();
   //lightShow();
 }
 

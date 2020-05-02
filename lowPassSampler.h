@@ -22,6 +22,7 @@ class LowPassSampler {
   
   public:
     LowPassSampler(Microphone *microphone, ILowPassFilter *lowPassFilter, int applyToVolumneIterations);
+    void initializeMicrophone();
     int read(int samplingRate);
     float detectFilterFrequency(int samples);
     
