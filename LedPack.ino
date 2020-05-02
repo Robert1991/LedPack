@@ -245,7 +245,6 @@ void loop()
 {
   //bassFilterShow();
   movementShow();
-  //soundShow();
   //lightShow();
 }
 
@@ -272,23 +271,6 @@ void movementShow() {
   delay(10);
   formerAcceleration = currentAcceleration;
 
-}
-
-void soundShow() {
-  int Analog;
-  int Digital;
-
-  Analog = microphone -> readAnalog();
-  Digital = microphone -> readDigital();
-
-  if (Digital == HIGH) {
-    shiftRegister1.turnOnAll();
-    shiftRegister2.turnOnAll();
-    delay(10);
-  } else {
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-  }
 }
 
 void lightShow() {
