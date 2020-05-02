@@ -4,46 +4,7 @@
 #include "lowPassSampler.h"
 #include "shiftregister.h"
 #include "Wire.h"
-
-
-bool alreadyTurnedOn(int *turnedOn, int arrayLength, int ledIndex) {
-  for (int i = 0; i < arrayLength; i++) {
-    if (turnedOn[i] == ledIndex) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-
-void turnOnLedsOnHeartRandomly(int minLedsTurnedOn) {
-  if (minLedsTurnedOn <= 14) {
-    int numberOfLedsTurnedOn = minLedsTurnedOn + ( rand() % ( 14 - minLedsTurnedOn + 1 ) );
-    int turnedOnLeds[numberOfLedsTurnedOn];
-
-    for (int i = 0; i < numberOfLedsTurnedOn; i++) {
-      int nextLed = rand() % 14;
-      while (alreadyTurnedOn(turnedOnLeds, numberOfLedsTurnedOn, nextLed)) {
-        nextLed = rand() % 14;
-      }
-      turnedOnLeds[i] = nextLed;
-    }
-
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-
-    for (int i = 0; i < sizeof(turnedOnLeds); i++) {
-      int turnedOnLedIndex = turnedOnLeds[i];
-
-      if (turnedOnLedIndex >= 7) {
-        shiftRegister2.turnOn(turnedOnLedIndex - 7);
-      } else {
-        shiftRegister1.turnOn(turnedOnLedIndex);
-      }
-    }
-  }
-}
+#include "ledHeart.h"
 
 
 // LED heart actor initialization
@@ -216,6 +177,11 @@ LedShiftRegisterPins shiftRegister2Pins = { 5, 6, 4, 3 };
 LedShiftRegister shiftRegister1 = LedShiftRegister(shiftRegister1Pins, ledsOnShiftRegister1, new Register1LevelActivator(), new Register1ColumnActivator());
 LedShiftRegister shiftRegister2 = LedShiftRegister(shiftRegister2Pins, ledsOnShiftRegister2, new Register2LevelActivator(), new Register2ColumnActivator());
 
+LedShiftRegister *newShiftRegister1 = new LedShiftRegister(shiftRegister1Pins, ledsOnShiftRegister1, new Register1LevelActivator(), new Register1ColumnActivator());
+LedShiftRegister *newShiftRegister2 = new LedShiftRegister(shiftRegister2Pins, ledsOnShiftRegister2, new Register2LevelActivator(), new Register2ColumnActivator());
+
+LedHeart ledHeart = LedHeart(newShiftRegister1, newShiftRegister2);
+
 // Gyroscope
 class LedBrightnessAccelerationRatioMapper : public IAccelerationRatioMapper {
   private:
@@ -262,57 +228,45 @@ Microphone* microphone = new Microphone(MICROPHONE_ANALOG_INPUT_PIN, MICROPHONE_
 ILowPassFilter* floatlowPassFilter = new FloatBasedLowPassFilter();
 LowPassSampler* floatLowPassSampler = new LowPassSampler(microphone, floatlowPassFilter, 1000);
 
-//ILowPassFilter* lowPassFilter = new IntegerBasedLowPassFilter();
-//LowPassSampler lowPassSampler = LowPassSampler(microphone, lowPassFilter, 1000);
-
 void setup()
 {
+  Serial.begin(9600);
   microphone -> init();
-
-  shiftRegister1.initializePins();
-  shiftRegister2.initializePins();
-
+  ledHeart.initialize();
   gyroScope.wakeUp();
 
   currentAcceleration = gyroScope.measureAcceleration();
   formerAcceleration = gyroScope.measureAcceleration();
 
-  shiftRegister1.turnOnAll();
-  shiftRegister2.turnOnAll();
-  
-  Serial.begin(9600);
+  ledHeart.turnOnAll();
 }
 
 void loop()
 {
-  bassFilterShow();
-  //movementShow();
+  //bassFilterShow();
+  movementShow();
   //soundShow();
   //lightShow();
 }
 
 void bassFilterShow() {
   int lvl = floatLowPassSampler -> read(samplesN);
-  if (lvl > 750) {
-    float brightnessFactor = lvl / 1023.0;
-    shiftRegister1.toggleBrightness((brightnessFactor * 255));
-    shiftRegister2.toggleBrightness((brightnessFactor * 255));
-
-    turnOnLedsOnHeartRandomly(2);
-  } else {
-    shiftRegister1.toggleBrightness(0);
-    shiftRegister2.toggleBrightness(0);
+  float brightnessFactor = lvl / 1023.0;
+  
+  if (lvl > 550) {
+    ledHeart.turnOnRandomly(2);
   }
+  
+  ledHeart.toggleBrightness((brightnessFactor * 255));
 }
 
 void movementShow() {
   currentAcceleration = gyroScope.measureAcceleration();
   AccerlationVectorDifference vectorDifference = currentAcceleration.euclideanDistanceTo2(formerAcceleration);
-  shiftRegister1.toggleBrightness(vectorDifference.mapAccelerationRatioTo(accelerationBrightnessMapper));
-  shiftRegister2.toggleBrightness(vectorDifference.mapAccelerationRatioTo(accelerationBrightnessMapper));
+  ledHeart.toggleBrightness(vectorDifference.mapAccelerationRatioTo(accelerationBrightnessMapper));
 
   if (vectorDifference.overThreshold(changeLightsThreshold)) {
-    turnOnLedsOnHeartRandomly(4);
+    ledHeart.turnOnRandomly(4);
   }
 
   delay(10);
