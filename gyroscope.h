@@ -34,6 +34,8 @@ class AccelerationMeasurementVector {
 
     static AccelerationMeasurementVector defaultVector();
 
+    AccelerationMeasurementVector();
+    
     AccelerationMeasurementVector(int accX, int accY, int accZ);
 
     float euclideanDistanceTo(AccelerationMeasurementVector otherVector);

@@ -7,6 +7,12 @@ AccelerationMeasurementVector::AccelerationMeasurementVector(int accX, int accY,
   this -> accZ = accZ;
 }
 
+AccelerationMeasurementVector::AccelerationMeasurementVector() {
+  this -> accX = 0;
+  this -> accY = 0;
+  this -> accZ = 0;
+}
+
 static AccelerationMeasurementVector AccelerationMeasurementVector::defaultVector() {
   return AccelerationMeasurementVector(0, 0, 0);
 }
