@@ -5,153 +5,9 @@
 #include "shiftregister.h"
 #include "Wire.h"
 #include "ledHeart.h"
-
+#include "lightShow.h"
 
 // LED heart actor initialization
-class Register1ColumnActivator : public ColumnActivator {
-  public:
-    void turnOnColumn(int column, Led *leds) {
-      if (column == 1) {
-        leds[4].turnOn();
-      } else if (column == 2) {
-        leds[3].turnOn();
-        leds[2].turnOn();
-        leds[5].turnOn();
-      } else if (column == 3) {
-        leds[1].turnOn();
-        leds[6].turnOn();
-      } else {
-        leds[0].turnOn();
-      }
-    }
-
-    void turnOffColumn(int column, Led *leds) {
-      if (column == 1) {
-        leds[4].turnOff();
-      } else if (column == 2) {
-        leds[3].turnOff();
-        leds[2].turnOff();
-        leds[5].turnOff();
-      } else if (column == 3) {
-        leds[1].turnOff();
-        leds[6].turnOff();
-      } else {
-        leds[0].turnOff();
-      }
-    }
-};
-
-class Register2ColumnActivator : public ColumnActivator {
-  public:
-    void turnOnColumn(int column, Led *leds) {
-      if (column == 1) {
-        leds[3].turnOn();
-      } else if (column == 2) {
-        leds[2].turnOn();
-        leds[4].turnOn();
-        leds[5].turnOn();
-      } else if (column == 3) {
-        leds[1].turnOn();
-        leds[6].turnOn();
-      } else {
-        leds[0].turnOn();
-      }
-    }
-
-    void turnOffColumn(int column, Led *leds) {
-      if (column == 1) {
-        leds[3].turnOff();
-      } else if (column == 2) {
-        leds[2].turnOff();
-        leds[4].turnOff();
-        leds[5].turnOff();
-      } else if (column == 3) {
-        leds[1].turnOff();
-        leds[6].turnOff();
-      } else {
-        leds[0].turnOff();
-      }
-    }
-};
-
-
-class Register1LevelActivator : public LevelActivator {
-  public:
-    void turnOnLevel(int level, Led *leds) {
-      if (level == 1) {
-        leds[0].turnOn();
-      } else if (level == 2) {
-        leds[1].turnOn();
-      } else if (level == 3) {
-        leds[2].turnOn();
-      } else if (level == 4) {
-        leds[3].turnOn();
-      } else if (level == 5) {
-        leds[4].turnOn();
-        leds[6].turnOn();
-      } else {
-        leds[5].turnOn();
-      }
-    }
-
-    void turnOffLevel(int level, Led *leds) {
-      if (level == 1) {
-        leds[0].turnOff();
-      } else if (level == 2) {
-        leds[1].turnOff();
-      } else if (level == 3) {
-        leds[2].turnOff();
-      } else if (level == 4) {
-        leds[3].turnOff();
-      } else if (level == 5) {
-        leds[4].turnOff();
-        leds[6].turnOff();
-      } else {
-        leds[5].turnOff();
-      }
-    }
-};
-
-
-class Register2LevelActivator : public LevelActivator {
-  public:
-    void turnOnLevel(int level, Led *leds) {
-      if (level == 1) {
-        // there is no level 1 for this
-      } else if (level == 2) {
-        leds[6].turnOn();
-      } else if (level == 3) {
-        leds[5].turnOn();
-      } else if (level == 4) {
-        leds[0].turnOn();
-        leds[4].turnOn();
-      } else if (level == 5) {
-        leds[1].turnOn();
-        leds[3].turnOn();
-      } else {
-        leds[2].turnOn();
-      }
-    }
-
-    void turnOffLevel(int level, Led *leds) {
-      if (level == 1) {
-        // there is no level 1 for this
-      } else if (level == 2) {
-        leds[6].turnOff();
-      } else if (level == 3) {
-        leds[5].turnOff();
-      } else if (level == 4) {
-        leds[0].turnOff();
-        leds[4].turnOff();
-      } else if (level == 5) {
-        leds[1].turnOff();
-        leds[3].turnOff();
-      } else {
-        leds[2].turnOff();
-      }
-    }
-};
-
 Led ledsOnShiftRegister1[7] = {
   Led(1, 6),
   Led(2, 0),
@@ -174,13 +30,13 @@ Led ledsOnShiftRegister2[7] = {
 
 LedShiftRegisterPins shiftRegister1Pins = { 10, 11, 8, 9 };
 LedShiftRegisterPins shiftRegister2Pins = { 5, 6, 4, 3 };
-LedShiftRegister shiftRegister1 = LedShiftRegister(shiftRegister1Pins, ledsOnShiftRegister1, new Register1LevelActivator(), new Register1ColumnActivator());
-LedShiftRegister shiftRegister2 = LedShiftRegister(shiftRegister2Pins, ledsOnShiftRegister2, new Register2LevelActivator(), new Register2ColumnActivator());
 
-LedShiftRegister *newShiftRegister1 = new LedShiftRegister(shiftRegister1Pins, ledsOnShiftRegister1, new Register1LevelActivator(), new Register1ColumnActivator());
-LedShiftRegister *newShiftRegister2 = new LedShiftRegister(shiftRegister2Pins, ledsOnShiftRegister2, new Register2LevelActivator(), new Register2ColumnActivator());
+LedShiftRegister *shiftRegister1 = new LedShiftRegister(shiftRegister1Pins, ledsOnShiftRegister1, new LeftRegisterLevelActivator(), new LeftRegisterColumnActivator());
+LedShiftRegister *shiftRegister2 = new LedShiftRegister(shiftRegister2Pins, ledsOnShiftRegister2, new RightRegisterLevelActivator(), new RightRegisterColumnActivator());
 
-LedHeart ledHeart = LedHeart(newShiftRegister1, newShiftRegister2);
+LedHeart *ledHeart = new LedHeart(shiftRegister1, shiftRegister2);
+LightShow lightShow = LightShow(ledHeart);
+
 
 // Gyroscope
 class LedBrightnessAccelerationRatioMapper : public IAccelerationRatioMapper {
@@ -222,264 +78,50 @@ const int MICROPHONE_ANALOG_INPUT_PIN = A1;
 const int MICROPHONE_ENABLED_PIN = 12;
 const int samplesN = 25;
 const int applyToVolumneIterations = 1000;
-LowPassSampler* floatLowPassSampler = new LowPassSampler(new Microphone(MICROPHONE_ANALOG_INPUT_PIN, MICROPHONE_ENABLED_PIN), 
-                                                         new FloatBasedLowPassFilter(), 
-                                                         applyToVolumneIterations);
-                                                         
+LowPassSampler* floatLowPassSampler = new LowPassSampler(new Microphone(MICROPHONE_ANALOG_INPUT_PIN, MICROPHONE_ENABLED_PIN),
+    new FloatBasedLowPassFilter(),
+    applyToVolumneIterations);
+
 void setup()
 {
   Serial.begin(9600);
   floatLowPassSampler -> initializeMicrophone();
-  ledHeart.initialize();
+  ledHeart -> initialize();
   gyroScope.wakeUp();
 
   currentAcceleration = gyroScope.measureAcceleration();
   formerAcceleration = gyroScope.measureAcceleration();
 
-  ledHeart.turnOnAll();
+  ledHeart -> turnOnAll();
 }
 
 void loop()
 {
-  bassFilterShow();
+  //bassFilterShow();
   //movementShow();
-  //lightShow();
+  lightShow.execute();
 }
 
 void bassFilterShow() {
   int lvl = floatLowPassSampler -> read(samplesN);
   float brightnessFactor = lvl / 1023.0;
-  
+
   if (lvl > 550) {
-    ledHeart.turnOnRandomly(2);
+    ledHeart -> turnOnRandomly(2);
   }
-  
-  ledHeart.toggleBrightness((brightnessFactor * 255));
+
+  ledHeart -> toggleBrightness((brightnessFactor * 255));
 }
 
 void movementShow() {
   currentAcceleration = gyroScope.measureAcceleration();
   AccerlationVectorDifference vectorDifference = currentAcceleration.euclideanDistanceTo2(formerAcceleration);
-  ledHeart.toggleBrightness(vectorDifference.mapAccelerationRatioTo(accelerationBrightnessMapper));
+  ledHeart -> toggleBrightness(vectorDifference.mapAccelerationRatioTo(accelerationBrightnessMapper));
 
   if (vectorDifference.overThreshold(changeLightsThreshold)) {
-    ledHeart.turnOnRandomly(4);
+    ledHeart -> turnOnRandomly(4);
   }
 
   delay(10);
   formerAcceleration = currentAcceleration;
-
-}
-
-void lightShow() {
-  // Turns on all leds in a row
-  for (int led = 0; led < 7; led++) {
-    shiftRegister1.turnOn(led);
-    delay(50);
-  }
-
-  for (int led = 0; led < 7; led++) {
-    shiftRegister2.turnOn(led);
-    delay(50);
-  }
-  //
-
-  // Let the leds blink 6 times
-  for (int i = 0; i < 6; i++) {
-    shiftRegister1.turnOnAll();
-    shiftRegister2.turnOnAll();
-    delay(500);
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-    delay(100);
-  }
-  //
-
-  // Turns on all leds in ascending id order
-  for (int j = 0; j < 4; j++) {
-    for (int led = 0; led < 7; led++) {
-      shiftRegister1.turnOn(led);
-      shiftRegister2.turnOn(led);
-      delay(50);
-    }
-
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-
-    for (int led = 6; led >= 0; led--) {
-      shiftRegister1.turnOn(led);
-      shiftRegister2.turnOn(led);
-      delay(50);
-    }
-
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-  }
-  //
-
-  // turns the levels on/off seperatley
-  for (int i = 0; i < 3; i++) {
-    for (int j = 1; j <= MAX_LEVEL; j++) {
-      shiftRegister1.turnOnLevel(j);
-      shiftRegister2.turnOnLevel(j);
-      delay(100);
-    }
-
-    for (int i = 1; i <= MAX_LEVEL; i++) {
-      shiftRegister1.turnOffLevel(i);
-      shiftRegister2.turnOffLevel(i);
-      delay(100);
-    }
-  }
-
-  for (int times = 0; times < 3; times++) {
-    for (int i = 0; i < 7; i++) {
-      if (i >= 1) {
-        shiftRegister1.turnOff(i - 1);
-        shiftRegister2.turnOff(i - 1);
-      }
-
-      shiftRegister1.turnOn(i);
-      shiftRegister2.turnOn(i);
-
-      delay(50);
-    }
-
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-  }
-
-  for (int times = 0; times < 3; times++) {
-    for (int i = 6; i >= 0; i--) {
-      if (i < 6) {
-        shiftRegister1.turnOff(i + 1);
-        shiftRegister2.turnOff(i + 1);
-      }
-
-      shiftRegister1.turnOn(i);
-      shiftRegister2.turnOn(i);
-
-      delay(50);
-    }
-
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-  }
-
-
-
-  for (int times = 0; times < 5; times++) {
-    for (int i = 1; i <= MAX_LEVEL; i++) {
-      if (i >= 1) {
-        shiftRegister1.turnOffLevel(i - 1);
-        shiftRegister2.turnOffLevel(i - 1);
-      }
-
-      shiftRegister1.turnOnLevel(i);
-      shiftRegister2.turnOnLevel(i);
-
-      delay(50);
-    }
-
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-  }
-
-  for (int i = 1; i <= MAX_LEVEL; i++) {
-    shiftRegister1.turnOnLevel(i);
-    shiftRegister2.turnOnLevel(i);
-    delay(125);
-  }
-
-  delay(250);
-
-  for (int i = MAX_LEVEL; i >= 1; i--) {
-    shiftRegister1.turnOffLevel(i);
-    shiftRegister2.turnOffLevel(i);
-    delay(50);
-  }
-
-  for (int j = 0; j < 5; j++) {
-    for (int i = 1; i <= MAX_COLUMNS; i++) {
-      if (i >= 2) {
-        shiftRegister1.turnOffColumn(i - 1);
-        shiftRegister2.turnOffColumn(i - 1);
-      }
-
-      shiftRegister1.turnOnColumn(i);
-      shiftRegister2.turnOnColumn(i);
-      delay(75);
-    }
-
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-  }
-
-  for (int j = 0; j < 5; j++) {
-    for (int i = 1; i <= MAX_COLUMNS; i++) {
-      shiftRegister1.turnOnColumn(i);
-      shiftRegister2.turnOnColumn(i);
-      delay(75);
-    }
-
-    shiftRegister1.turnOffAll();
-    shiftRegister2.turnOffAll();
-  }
-
-  for (int i = 1; i <= MAX_COLUMNS; i++) {
-    shiftRegister1.turnOnColumn(i);
-    shiftRegister2.turnOnColumn(i);
-    delay(200);
-  }
-
-  delay(500);
-
-  for (int j = MAX_COLUMNS; j > 0; j--) {
-    shiftRegister1.turnOffColumn(j);
-    shiftRegister2.turnOffColumn(j);
-    delay(125);
-  }
-
-  shiftRegister1.turnOffAll();
-  shiftRegister2.turnOffAll();
-
-  for (int j = 1; j <= MAX_COLUMNS; j++) {
-    if (j > 1) {
-      shiftRegister2.turnOffColumn(j - 1);
-    }
-    shiftRegister2.turnOnColumn(j);
-    delay(75);
-  }
-
-  shiftRegister2.turnOffAll();
-
-  for (int j = MAX_COLUMNS; j > 0; j--) {
-    if (j < MAX_COLUMNS) {
-      shiftRegister1.turnOffColumn(j + 1);
-    }
-    shiftRegister1.turnOnColumn(j);
-    delay(75);
-  }
-
-  shiftRegister1.turnOffAll();
-
-  for (int j = 1; j <= MAX_COLUMNS; j++) {
-    if (j > 0) {
-      shiftRegister1.turnOffColumn(j - 1);
-    }
-    shiftRegister1.turnOnColumn(j);
-    delay(75);
-  }
-
-  shiftRegister1.turnOffAll();
-
-  for (int j = MAX_COLUMNS; j > 0; j--) {
-    if (j < MAX_COLUMNS) {
-      shiftRegister2.turnOffColumn(j + 1);
-    }
-    shiftRegister2.turnOnColumn(j);
-    delay(75);
-  }
-
-  shiftRegister2.turnOffAll();
 }
