@@ -7,9 +7,10 @@
 #include "ledHeart.h"
 #include "lightShow.h"
 #include "movementShow.h"
+#include "bassfilterShow.h"
 
 // LED heart actor initialization
-Led ledsOnShiftRegister1[7] = {
+const Led ledsOnShiftRegister1[7] = {
   Led(1, 6),
   Led(2, 0),
   Led(3, 1),
@@ -19,7 +20,7 @@ Led ledsOnShiftRegister1[7] = {
   Led(7, 5)
 };
 
-Led ledsOnShiftRegister2[7] = {
+const Led ledsOnShiftRegister2[7] = {
   Led(1, 2),
   Led(2, 1),
   Led(3, 0),
@@ -49,11 +50,12 @@ MovementShow movementShow = MovementShow(ledHeart, gyroscope, changeLightsThresh
 // Bass filter initialization
 const int MICROPHONE_ANALOG_INPUT_PIN = A1;
 const int MICROPHONE_ENABLED_PIN = 12;
-const int samplesN = 25;
 const int applyToVolumneIterations = 1000;
 LowPassSampler* floatLowPassSampler = new LowPassSampler(new Microphone(MICROPHONE_ANALOG_INPUT_PIN, MICROPHONE_ENABLED_PIN),
     new FloatBasedLowPassFilter(),
     applyToVolumneIterations);
+const int samplesN = 25;
+BassFilterShow bassFilterShow = BassFilterShow(ledHeart, floatLowPassSampler, samplesN);
 
 
 void setup()
@@ -62,24 +64,12 @@ void setup()
   floatLowPassSampler -> initializeMicrophone();
   ledHeart -> initialize();
   movementShow.initialize();
-  
   ledHeart -> turnOnAll();
 }
 
 void loop()
 {
-  //bassFilterShow();
-  movementShow.executeIteration();
+  bassFilterShow.executeIteration(550);
+  //movementShow.executeIteration();
   //lightShow.execute();
-}
-
-void bassFilterShow() {
-  int lvl = floatLowPassSampler -> read(samplesN);
-  float brightnessFactor = lvl / 1023.0;
-
-  if (lvl > 550) {
-    ledHeart -> turnOnRandomly(2);
-  }
-
-  ledHeart -> toggleBrightness((brightnessFactor * 255));
 }
