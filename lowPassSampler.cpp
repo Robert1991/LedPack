@@ -1,9 +1,10 @@
 #include "lowPassSampler.h"
 
-LowPassSampler::LowPassSampler(Microphone *microphone, ILowPassFilter *lowPassFilter, int applyToVolumneIterations) {
+LowPassSampler::LowPassSampler(Microphone *microphone, ILowPassFilter *lowPassFilter, IStandardFunctions *stdFunctions, int applyToVolumneIterations) {
   this -> microphone = microphone;
   this -> lowPassFilter = lowPassFilter;
   this -> applyToVolumneIterations = applyToVolumneIterations;
+  this -> stdFunctions = stdFunctions;
 }
 
 void LowPassSampler::initializeMicrophone() {
@@ -13,9 +14,9 @@ void LowPassSampler::initializeMicrophone() {
 int LowPassSampler::read(int samplingRate) {
   applyToVolumeIfNecassary();
   int peak = readPeakFrom(samplingRate);
-  maxPeak = max(maxPeak, peak);
-  minPeak = min(minPeak, peak);
-  return map(peak, minPeak, maxPeak, MINIMUM_PEAK, MAXIMUM_PEAK);
+  maxPeak = stdFunctions -> maxValue(maxPeak, peak);
+  minPeak = stdFunctions -> minValue(minPeak, peak);
+  return stdFunctions -> mapValue(peak, minPeak, maxPeak, MINIMUM_PEAK, MAXIMUM_PEAK);
 }
 
 int LowPassSampler::readPeakFrom(int samples) {
@@ -24,7 +25,7 @@ int LowPassSampler::readPeakFrom(int samples) {
     int val = this -> microphone -> readAnalog();
     this -> lowPassFilter -> put(val);
     int filtered = lowPassFilter->get();
-    peak = max(peak, filtered);
+    peak = stdFunctions -> maxValue(peak, filtered);
   }
   return peak;
 }
@@ -40,9 +41,9 @@ void LowPassSampler::applyToVolumeIfNecassary() {
 }
 
 float LowPassSampler::detectFilterFrequency(int samples) {
-  long start = millis();
+  long start = stdFunctions -> getCurrentMilliseconds();
   readPeakFrom(samples);
-  long end = millis();
+  long end = stdFunctions -> getCurrentMilliseconds();
   float freq = ((float)samples * (float)1000) / ((float)end - (float)start);
   return freq;
 }

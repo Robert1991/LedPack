@@ -1,7 +1,6 @@
 #ifndef gyroscope_h
 #define gyroscope_h
 
-#include "Arduino.h"
 #include "Wire.h"
 
 const float MAX_ACCELERATION_VECTOR_DIFFERENCE = 65536.0;
@@ -38,9 +37,7 @@ class AccelerationMeasurementVector {
     
     AccelerationMeasurementVector(int accX, int accY, int accZ);
 
-    float euclideanDistanceTo(AccelerationMeasurementVector otherVector);
-
-    AccerlationVectorDifference euclideanDistanceTo2(AccelerationMeasurementVector otherVector);
+    AccerlationVectorDifference euclideanDistanceTo(AccelerationMeasurementVector otherVector);
 
     void printOut();
 };

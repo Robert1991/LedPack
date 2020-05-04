@@ -36,10 +36,12 @@ class LedHeart {
   private:
     LedShiftRegister *leftShiftRegister;
     LedShiftRegister *rightShiftRegister;
+    IStandardFunctions *stdFunctions;
+    
     bool alreadyTurnedOn(int *turnedOn, int arrayLength, int ledIndex);
 
   public:
-    LedHeart(LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister);
+    LedHeart(IStandardFunctions *stdFunctions, LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister);
 
     void initialize();
 

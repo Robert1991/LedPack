@@ -3,6 +3,7 @@
 
 #include "gyroscope.h"
 #include "ledHeart.h"
+#include "arduinoWrapper.h"
 
 class LedBrightnessAccelerationRatioMapper : public IAccelerationRatioMapper {
   private:
@@ -39,10 +40,11 @@ class MovementShow {
 
     LedHeart *ledHeart;
     Gyroscope *gyroscope;
+    IArduinoWrapper *arduinoEnv;
     float changeLightsThreshold;
     
   public:
-    MovementShow(LedHeart *ledHeart, Gyroscope *gyroscope, float changeLightsThreshold = 12000.0);
+    MovementShow(LedHeart *ledHeart, Gyroscope *gyroscope, IArduinoWrapper *arduinoEnv, float changeLightsThreshold = 12000.0);
 
     void initialize();
 

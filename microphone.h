@@ -1,16 +1,17 @@
 #ifndef microphone_h
 #define microphone_h
 
-#include "Arduino.h"
+#include "arduinoWrapper.h"
 
 class Microphone
 {
   private:
+    IArduinoWrapper *arduinoEnv;
     int microphonePin;
     int digitalInputPin;
     
   public:
-    Microphone(int microphonePin, int digitalInputPin);
+    Microphone(IArduinoWrapper *arduinoEnv, int microphonePin, int digitalInputPin);
 
     void init();
     

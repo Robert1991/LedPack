@@ -1,8 +1,8 @@
 #include "lightShow.h"
-#include "ledHeart.h"
 
-LightShow::LightShow(LedHeart *ledHeart) {
+LightShow::LightShow(IArduinoWrapper *arduinoEnv, LedHeart *ledHeart) {
   this -> ledHeart = ledHeart;
+  this -> arduinoEnv = arduinoEnv;
 }
 
 void LightShow::execute() {
@@ -33,7 +33,7 @@ void LightShow::execute() {
   
   turnOnLevelsFromBottomToTop(125);
   
-  delay(250);
+  arduinoEnv -> delayFor(250);
   
   turnOffLevelsFromTopToBottom(50);
   
@@ -47,7 +47,7 @@ void LightShow::execute() {
   
   turnOnColumnsOutsideToInside(200);
   
-  delay(500);
+  arduinoEnv -> delayFor(500);
   
   turnOffColumnsInsideToOutside(125);
   turnOnColumnsFromRightToLeft(75, true);
@@ -58,16 +58,16 @@ void LightShow::turnOnAllLedsOnHeartInARow(int timeout) {
   this -> ledHeart -> turnOffAll();
   for (int led = 0; led < HEART_LED_COUNT; led++) {
     ledHeart -> turnOn(led);
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 }
 
 void LightShow::letLedsOnHeartBlinkFor(int times, int onTimeout, int offTimeout) {
   for (int i = 0; i < times; i++) {
     this -> ledHeart -> turnOnAll();
-    delay(onTimeout);
+    arduinoEnv -> delayFor(onTimeout);
     this -> ledHeart -> turnOffAll();
-    delay(offTimeout);
+    arduinoEnv -> delayFor(offTimeout);
   }
 }
 
@@ -82,7 +82,7 @@ void LightShow::letLedsTwistRight(int timeout, bool turnOffFormerLed = true) {
     ledHeart -> turnOn(led);
     ledHeart -> turnOn(led + 7);
 
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 
   ledHeart -> turnOffAll();
@@ -97,20 +97,20 @@ void LightShow::letLedsTwistLeft(int timeout, bool turnOffFormerLed = true) {
 
     ledHeart -> turnOn(led - 1);
     ledHeart -> turnOn(led + 7 - 1);
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 
   ledHeart -> turnOffAll();
 }
 
-void LightShow::turnOnLevelsFromBottomToTop(int timeout, boolean turnOffFormerLevel = false) {
+void LightShow::turnOnLevelsFromBottomToTop(int timeout, bool turnOffFormerLevel = false) {
   for (int level = 1; level <= HEART_LEVEL_COUNT; level++) {
     if (level > 1 && turnOffFormerLevel) {
       ledHeart -> turnLevelOff(level - 1);
     }
     
     ledHeart -> turnLevelOn(level);
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 
   if (turnOffFormerLevel) {
@@ -121,14 +121,14 @@ void LightShow::turnOnLevelsFromBottomToTop(int timeout, boolean turnOffFormerLe
 void LightShow::turnOffLevelsFromBottomToTop(int timeout) {
   for (int level = 1; level <= HEART_LEVEL_COUNT; level++) {
     ledHeart -> turnLevelOff(level);
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 }
 
 void LightShow::turnOffLevelsFromTopToBottom(int timeout) {
   for (int i = HEART_LEVEL_COUNT; i >= 1; i--) {
     ledHeart -> turnLevelOff(i);
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 }
 
@@ -142,7 +142,7 @@ void LightShow::turnOnColumnsOutsideToInside(int timeout, bool turnOffFormerColu
 
     ledHeart -> turnColumnOn(column);
     ledHeart -> turnColumnOn(HEART_COLUMN_COUNT + 1 - column);
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 
   if (turnOffAfterwards || turnOffFormerColumn) {
@@ -159,7 +159,7 @@ void LightShow::turnOffColumnsInsideToOutside(int timeout) {
       ledHeart -> turnColumnOff(HEART_COLUMN_COUNT + 1 - column);
     }
 
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 }
 
@@ -169,7 +169,7 @@ void LightShow::turnOnColumnsFromRightToLeft(int timeout, bool turnOffFormerColu
       ledHeart -> turnColumnOff(column - 1);
     }
     ledHeart -> turnColumnOn(column);
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 
   if (turnOffFormerColumn) {
@@ -183,7 +183,7 @@ void LightShow::turnOnColumnsFromLeftToRight(int timeout, bool turnOffFormerColu
       ledHeart -> turnColumnOff(column + 1);
     }
     ledHeart -> turnColumnOn(column);
-    delay(timeout);
+    arduinoEnv -> delayFor(timeout);
   }
 
   if (turnOffFormerColumn) {

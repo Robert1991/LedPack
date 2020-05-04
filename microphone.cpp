@@ -1,19 +1,20 @@
 #include "microphone.h"
-#include "Arduino.h"
 
-Microphone::Microphone(int microphonePin, int digitalInputPin) {
+
+Microphone::Microphone(IArduinoWrapper *arduinoEnv, int microphonePin, int digitalInputPin) {
   this -> microphonePin = microphonePin;
   this -> digitalInputPin = digitalInputPin;
+  this -> arduinoEnv = arduinoEnv;
 }
 
 void Microphone::init() {
-  pinMode(this -> digitalInputPin, INPUT);
+  arduinoEnv -> setPinToInputMode(digitalInputPin);
 }
 
 int Microphone::readAnalog() {
-  return analogRead(microphonePin);
+  return arduinoEnv -> readAnalogFrom(microphonePin);
 }
 
 int Microphone::readDigital() {
-  return digitalRead(digitalInputPin);
+  return arduinoEnv -> readDigitalFrom(microphonePin);
 }

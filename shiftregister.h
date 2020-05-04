@@ -1,7 +1,7 @@
 #ifndef shiftregister_h
 #define shiftregister_h
 
-#include "Arduino.h"
+#include "arduinoWrapper.h"
 
 const int MAX_SHIFT_REGISTER_LED_COUNT = 7;
 const int MAX_LEVEL = 6;
@@ -16,6 +16,8 @@ class Led {
     bool on;
 
     Led(int ledNum, int shiftRegisterPosition);
+
+    Led();
 
     void turnOn();
 
@@ -45,16 +47,17 @@ class ColumnActivator {
 
 class LedShiftRegister {
   private:
+    IArduinoWrapper *arduinoEnv;
     LevelActivator *levelActivator;
     ColumnActivator *columnActivator;
     byte shiftRegisterByte;
     LedShiftRegisterPins pins;
-    Led *leds;
-
+    Led leds[MAX_SHIFT_REGISTER_LED_COUNT];
+    
     void updateShiftRegisterByte();
 
   public:
-    LedShiftRegister(LedShiftRegisterPins pins, Led *ledsOnShiftRegister, LevelActivator *levelActivator, ColumnActivator *columnActivator);
+    LedShiftRegister(LedShiftRegisterPins pins, Led *ledsOnShiftRegister, LevelActivator *levelActivator, ColumnActivator *columnActivator, IArduinoWrapper *arduinoEnvironment);
 
     void turnOn(int ledIndex);
 

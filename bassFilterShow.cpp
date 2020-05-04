@@ -1,6 +1,5 @@
 #include "bassfilterShow.h"
-#include "lowPassSampler.h"
-#include "ledHeart.h"
+
 
 BassFilterShow::BassFilterShow(LedHeart *ledHeart, LowPassSampler *lowPassSampler, int lowPassFilterSamples = 25) {
   this -> ledHeart = ledHeart;

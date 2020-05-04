@@ -17,11 +17,7 @@ static AccelerationMeasurementVector AccelerationMeasurementVector::defaultVecto
   return AccelerationMeasurementVector(0, 0, 0);
 }
 
-float AccelerationMeasurementVector::euclideanDistanceTo(AccelerationMeasurementVector otherVector) {
-  return sqrt(pow(this -> accX - otherVector.accX, 2) + pow(this -> accY - otherVector.accY, 2) + pow(this -> accZ - otherVector.accZ, 2));
-}
-
-AccerlationVectorDifference AccelerationMeasurementVector::euclideanDistanceTo2(AccelerationMeasurementVector otherVector) {
+AccerlationVectorDifference AccelerationMeasurementVector::euclideanDistanceTo(AccelerationMeasurementVector otherVector) {
   float euclideanDistance = sqrt(pow(this -> accX - otherVector.accX, 2) + pow(this -> accY - otherVector.accY, 2) + pow(this -> accZ - otherVector.accZ, 2));
   float accRatio = euclideanDistance / MAX_ACCELERATION_VECTOR_DIFFERENCE;
   return AccerlationVectorDifference(euclideanDistance, accRatio);

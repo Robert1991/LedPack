@@ -1,5 +1,10 @@
 #include "shiftregister.h"
-#include "Arduino.h"
+#include "arduinoWrapper.h"
+
+Led::Led() {
+  this-> ledNumber = -1;
+  this-> shiftRegisterPosition = -1;
+}
 
 Led::Led(int ledNum, int shiftRegisterPosition) {
   this-> ledNumber = ledNum;
@@ -18,13 +23,12 @@ LevelActivator::LevelActivator() {}
 
 ColumnActivator::ColumnActivator() {}
 
-LedShiftRegister::LedShiftRegister(LedShiftRegisterPins pins, Led *ledsOnShiftRegister, LevelActivator *levelActivator, ColumnActivator *columnActivator) {
-  this-> pins = pins;
-  this-> shiftRegisterByte = 0;
-  this-> levelActivator = levelActivator;
-  this-> columnActivator = columnActivator;
-  leds = malloc(MAX_SHIFT_REGISTER_LED_COUNT * sizeof(Led));
-
+LedShiftRegister::LedShiftRegister(LedShiftRegisterPins pins, Led *ledsOnShiftRegister, LevelActivator *levelActivator, ColumnActivator *columnActivator, IArduinoWrapper *arduinoEnv) {
+  this -> pins = pins;
+  this -> shiftRegisterByte = 0;
+  this -> levelActivator = levelActivator;
+  this -> columnActivator = columnActivator;
+  this -> arduinoEnv = arduinoEnv;
   for (int i = 0; i < MAX_SHIFT_REGISTER_LED_COUNT; i++) {
     this->leds[i] = ledsOnShiftRegister[i];
   }
@@ -36,9 +40,9 @@ void LedShiftRegister::updateShiftRegisterByte() {
   for (int i = 0; i < MAX_SHIFT_REGISTER_LED_COUNT; i++) {
     Led led = leds[i];
     if (led.on) {
-      bitSet(shiftRegisterByte, led.shiftRegisterPosition);
+      arduinoEnv -> setBit(shiftRegisterByte, led.shiftRegisterPosition);
     } else {
-      bitClear(shiftRegisterByte, led.shiftRegisterPosition);
+      arduinoEnv -> clearBit(shiftRegisterByte, led.shiftRegisterPosition);
     }
   }
 }
@@ -103,20 +107,20 @@ void LedShiftRegister::turnOffColumn(int column) {
 
 void LedShiftRegister::toggleBrightness(byte value) {
   if (value >= 0 && value <= 255) {
-    analogWrite(pins.outputEnablePin, 255-value);
+    arduinoEnv -> writeToAnalog(pins.outputEnablePin, 255-value);
   }
 }
 
 void LedShiftRegister::updateShiftRegister() {
   updateShiftRegisterByte();
-  digitalWrite(pins.latchPin, LOW);
-  shiftOut(pins.dataPin, pins.clockPin, LSBFIRST, shiftRegisterByte);
-  digitalWrite(pins.latchPin, HIGH);
+  arduinoEnv -> writeLOWToDigital(pins.latchPin);
+  arduinoEnv -> shift(pins.dataPin, pins.clockPin, shiftRegisterByte);
+  arduinoEnv -> writeHIGHToDigital(pins.latchPin);
 }
 
 void LedShiftRegister::initializePins() {
-  pinMode(pins.latchPin, OUTPUT);
-  pinMode(pins.dataPin, OUTPUT);
-  pinMode(pins.clockPin, OUTPUT);
-  pinMode(pins.outputEnablePin, OUTPUT);
+  arduinoEnv -> setPinToOutputMode(pins.latchPin);
+  arduinoEnv -> setPinToOutputMode(pins.dataPin);
+  arduinoEnv -> setPinToOutputMode(pins.clockPin);
+  arduinoEnv -> setPinToOutputMode(pins.outputEnablePin);
 }

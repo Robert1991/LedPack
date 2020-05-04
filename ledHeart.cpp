@@ -128,7 +128,8 @@ void RightRegisterColumnActivator::turnOffColumn(int column, Led *leds) {
   }
 }
 
-LedHeart::LedHeart(LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister) {
+LedHeart::LedHeart(IStandardFunctions *stdFunctions, LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister) {
+  this -> stdFunctions = stdFunctions;
   this -> leftShiftRegister = leftShiftRegister;
   this -> rightShiftRegister = rightShiftRegister;
 }
@@ -170,13 +171,13 @@ void LedHeart::turnOff(int ledIndex) {
 
 void LedHeart::turnOnRandomly(int minLedsTurnedOn = 0) {
   if (minLedsTurnedOn <= HEART_LED_COUNT) {
-    int numberOfLedsTurnedOn = minLedsTurnedOn + ( rand() % ( HEART_LED_COUNT - minLedsTurnedOn + 1 ) );
+    int numberOfLedsTurnedOn = minLedsTurnedOn + ( stdFunctions -> nextRandomInt() % ( HEART_LED_COUNT - minLedsTurnedOn + 1 ) );
     int turnedOnLeds[numberOfLedsTurnedOn];
 
     for (int i = 0; i < numberOfLedsTurnedOn; i++) {
-      int nextLed = rand() % 14;
+      int nextLed = stdFunctions -> nextRandomInt() % 14;
       while (alreadyTurnedOn(turnedOnLeds, numberOfLedsTurnedOn, nextLed)) {
-        nextLed = rand() % 14;
+        nextLed = stdFunctions -> nextRandomInt() % 14;
       }
       turnedOnLeds[i] = nextLed;
     }
