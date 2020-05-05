@@ -16,5 +16,5 @@ int Microphone::readAnalog() {
 }
 
 int Microphone::readDigital() {
-  return arduinoEnv -> readDigitalFrom(microphonePin);
+  return arduinoEnv -> readDigitalFrom(digitalInputPin);
 }

@@ -170,6 +170,6 @@ void setup()
 void loop()
 {
   //bassFilterShow.executeIteration(550);
-  movementShow.executeIteration();
-  //lightShow.execute();
+  //movementShow.executeIteration();
+  lightShow.execute();
 }
