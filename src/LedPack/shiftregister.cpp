@@ -34,6 +34,10 @@ LedShiftRegister::LedShiftRegister(LedShiftRegisterPins pins, Led *ledsOnShiftRe
   }
 }
 
+LedShiftRegister::LedShiftRegister() {
+
+}
+
 void LedShiftRegister::updateShiftRegisterByte() {
   shiftRegisterByte = 0;
 

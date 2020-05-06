@@ -58,6 +58,8 @@ class LedShiftRegister {
     void updateShiftRegisterByte();
 
   public:
+    LedShiftRegister();
+
     LedShiftRegister(LedShiftRegisterPins pins, Led *ledsOnShiftRegister, LevelActivator *levelActivator, ColumnActivator *columnActivator, IArduinoWrapper *arduinoEnvironment);
 
     void turnOn(int ledIndex);
