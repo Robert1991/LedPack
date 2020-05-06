@@ -1,5 +1,6 @@
 add_library(microphone "")
 add_library(shiftRegister "")
+add_library(ledHeart "")
 add_library(arduinoWrapper INTERFACE)
 
 target_sources(
@@ -26,6 +27,20 @@ target_sources(
 
 target_include_directories(
     shiftRegister
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}
+)
+
+target_sources(
+    ledHeart
+    PRIVATE
+        LedPack/ledHeart.cpp
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/LedPack/ledHeart.h
+    )
+
+target_include_directories(
+    ledHeart
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}
 )

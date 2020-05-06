@@ -13,7 +13,7 @@ void LeftRegisterLevelActivator::turnOnLevel(int level, Led *leds) {
   } else if (level == 5) {
     leds[4].turnOn();
     leds[6].turnOn();
-  } else {
+  } else if (level == 6) {
     leds[5].turnOn();
   }
 }
@@ -30,7 +30,7 @@ void LeftRegisterLevelActivator::turnOffLevel(int level, Led *leds) {
   } else if (level == 5) {
     leds[4].turnOff();
     leds[6].turnOff();
-  } else {
+  } else if (level == 6) {
     leds[5].turnOff();
   }
 }
@@ -47,7 +47,7 @@ void RightRegisterLevelActivator::turnOnLevel(int level, Led *leds) {
   } else if (level == 5) {
     leds[1].turnOn();
     leds[3].turnOn();
-  } else {
+  } else if (level == 6){
     leds[2].turnOn();
   }
 }
@@ -64,7 +64,7 @@ void RightRegisterLevelActivator::turnOffLevel(int level, Led *leds) {
   } else if (level == 5) {
     leds[1].turnOff();
     leds[3].turnOff();
-  } else {
+  } else if (level == 6){
     leds[2].turnOff();
   }
 }
@@ -78,7 +78,7 @@ void LeftRegisterColumnActivator::turnOnColumn(int column, Led *leds) {
   } else if (column == 3) {
     leds[1].turnOn();
     leds[6].turnOn();
-  } else {
+  } else if (column == 4) {
     leds[0].turnOn();
   }
 }
@@ -93,7 +93,7 @@ void LeftRegisterColumnActivator::turnOffColumn(int column, Led *leds) {
   } else if (column == 3) {
     leds[1].turnOff();
     leds[6].turnOff();
-  } else {
+  } else if (column == 4){
     leds[0].turnOff();
   }
 }
@@ -108,7 +108,7 @@ void RightRegisterColumnActivator::turnOnColumn(int column, Led *leds) {
   } else if (column == 3) {
     leds[1].turnOn();
     leds[6].turnOn();
-  } else {
+  } else if (column == 4){
     leds[0].turnOn();
   }
 }
@@ -123,7 +123,7 @@ void RightRegisterColumnActivator::turnOffColumn(int column, Led *leds) {
   } else if (column == 3) {
     leds[1].turnOff();
     leds[6].turnOff();
-  } else {
+  } else if (column == 4){
     leds[0].turnOff();
   }
 }
@@ -169,7 +169,7 @@ void LedHeart::turnOff(int ledIndex) {
   }
 }
 
-void LedHeart::turnOnRandomly(int minLedsTurnedOn = 0) {
+void LedHeart::turnOnRandomly(int minLedsTurnedOn) {
   if (minLedsTurnedOn <= HEART_LED_COUNT) {
     int numberOfLedsTurnedOn = minLedsTurnedOn + ( stdFunctions -> nextRandomInt() % ( HEART_LED_COUNT - minLedsTurnedOn + 1 ) );
     int turnedOnLeds[numberOfLedsTurnedOn];
