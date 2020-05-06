@@ -11,6 +11,8 @@ class Microphone
     int digitalInputPin;
     
   public:
+    Microphone();
+
     Microphone(IArduinoWrapper *arduinoEnv, int microphonePin, int digitalInputPin);
 
     void init();
