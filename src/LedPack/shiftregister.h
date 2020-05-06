@@ -54,6 +54,7 @@ class LedShiftRegister {
     LedShiftRegisterPins pins;
     Led leds[MAX_SHIFT_REGISTER_LED_COUNT];
     
+    void updateShiftRegister();
     void updateShiftRegisterByte();
 
   public:
@@ -73,9 +74,7 @@ class LedShiftRegister {
 
     void turnOnColumn(int column);
 
-    void turnOffColumn(int column);
-
-    void updateShiftRegister();
+    void turnOffColumn(int column);    
 
     void toggleBrightness(byte value);
 

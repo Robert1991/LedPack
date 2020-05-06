@@ -47,6 +47,13 @@ void LedShiftRegister::updateShiftRegisterByte() {
   }
 }
 
+void LedShiftRegister::updateShiftRegister() {
+  updateShiftRegisterByte();
+  arduinoEnv -> writeLOWToDigital(pins.latchPin);
+  arduinoEnv -> shift(pins.dataPin, pins.clockPin, shiftRegisterByte);
+  arduinoEnv -> writeHIGHToDigital(pins.latchPin);
+}
+
 void LedShiftRegister::turnOn(int ledIndex) {
   if (ledIndex >= 0 && ledIndex < MAX_SHIFT_REGISTER_LED_COUNT) {
     leds[ledIndex].turnOn();
@@ -106,16 +113,9 @@ void LedShiftRegister::turnOffColumn(int column) {
 }
 
 void LedShiftRegister::toggleBrightness(byte value) {
-  if (value >= 0 && value <= 255) {
+  if (value >= 0 && value < 256) {
     arduinoEnv -> writeToAnalog(pins.outputEnablePin, 255-value);
   }
-}
-
-void LedShiftRegister::updateShiftRegister() {
-  updateShiftRegisterByte();
-  arduinoEnv -> writeLOWToDigital(pins.latchPin);
-  arduinoEnv -> shift(pins.dataPin, pins.clockPin, shiftRegisterByte);
-  arduinoEnv -> writeHIGHToDigital(pins.latchPin);
 }
 
 void LedShiftRegister::initializePins() {

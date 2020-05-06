@@ -1,6 +1,5 @@
 #include "microphone.h"
 
-
 Microphone::Microphone(IArduinoWrapper *arduinoEnv, int microphonePin, int digitalInputPin) {
   this -> microphonePin = microphonePin;
   this -> digitalInputPin = digitalInputPin;

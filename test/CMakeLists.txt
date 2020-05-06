@@ -1,6 +1,7 @@
 add_executable(
     unit_tests
     Microphone-test.cpp
+    ShiftRegister-test.cpp
 )
 
 target_link_libraries(
@@ -8,6 +9,7 @@ target_link_libraries(
     gtest_main
     gmock_main
     microphone
+    shiftRegister
     arduinoWrapper
 )
 
