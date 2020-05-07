@@ -28,9 +28,7 @@ public:
         Led(5, 4),
         Led(6, 5),
         Led(7, 6)};
-
     Led ledsOnShiftRegister[MAX_SHIFT_REGISTER_LED_COUNT];
-
     const LedShiftRegisterPins SHIFT_REGISTER_PINS = {LATCH_PIN, CLOCK_PIN, DATA_PIN, OUTPUT_ENABLE_PIN};
 
     TestArduinoEnvironment testArduinoEnv;

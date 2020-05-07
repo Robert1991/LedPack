@@ -14,7 +14,6 @@ public:
     static const int MICROPHONE_ANALOG_PIN = 5;
     static const int MICROPHONE_DIGITAL_PIN = 10;
 
-    
     TestArduinoEnvironment testArduinoEnv;
     Microphone microphone;
 

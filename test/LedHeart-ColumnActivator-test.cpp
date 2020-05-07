@@ -5,9 +5,6 @@
 class LedHeartColumnActivatorTest : public ::testing::Test
 {
 public:
-    LeftRegisterColumnActivator leftRegisterColumnActivator = LeftRegisterColumnActivator();
-    RightRegisterColumnActivator rightRegisterColumnActivator = RightRegisterColumnActivator();
-
     Led LEDS_ON_SHIFT_REGISTER[MAX_SHIFT_REGISTER_LED_COUNT] = {
         // Led number, position on shift register
         Led(1, 0),
@@ -20,6 +17,9 @@ public:
 
     Led allLedsTurnedOff[MAX_SHIFT_REGISTER_LED_COUNT];
     Led allLedsTurnedOn[MAX_SHIFT_REGISTER_LED_COUNT];
+
+    LeftRegisterColumnActivator leftRegisterColumnActivator = LeftRegisterColumnActivator();
+    RightRegisterColumnActivator rightRegisterColumnActivator = RightRegisterColumnActivator();
 
 protected:
     void SetUp() override
