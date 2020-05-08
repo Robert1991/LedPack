@@ -46,15 +46,17 @@ class IArduinoWrapper {
 
 class IStandardFunctions {
   public:
-    virtual int maxValue(int firstValue, int secondValue) = 0;
+    virtual long maxValue(long firstValue, long secondValue) = 0;
 
-    virtual int minValue(int firstValue, int secondValue) = 0;
+    virtual long minValue(long firstValue, long secondValue) = 0;
 
-    virtual int mapValue(int value, int currentLower, int currentUpper, int maximumUpper, int maximumLower) = 0;
+    virtual long mapValue(long value, long currentLower, long currentUpper, long maximumLower, long maximumUpper) = 0;
 
-    virtual int getCurrentMilliseconds() = 0;
+    virtual long getCurrentMilliseconds() = 0;
 
     virtual int nextRandomInt() = 0;
+
+    virtual int nextRandomIntInBounds(int lower, int upper) = 0;
 };
 
 #endif

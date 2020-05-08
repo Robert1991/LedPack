@@ -24,12 +24,14 @@ class Led {
     void turnOff();
 };
 
+#ifndef LedShiftRegisterPins
 typedef struct LedShiftRegisterPins {
   int latchPin;
   int clockPin;
   int dataPin;
   int outputEnablePin;
 };
+#endif
 
 class LevelActivator {
   public:
@@ -62,25 +64,25 @@ class LedShiftRegister {
 
     LedShiftRegister(LedShiftRegisterPins pins, Led *ledsOnShiftRegister, LevelActivator *levelActivator, ColumnActivator *columnActivator, IArduinoWrapper *arduinoEnvironment);
 
-    void turnOn(int ledIndex);
+    virtual void turnOn(int ledIndex);
 
-    void turnOff(int ledIndex);
+    virtual void turnOff(int ledIndex);
 
-    void turnOffAll();
+    virtual void turnOffAll();
 
-    void turnOnAll();
+    virtual void turnOnAll();
 
-    void turnOnLevel(int level);
+    virtual void turnOnLevel(int level);
 
-    void turnOffLevel(int level);
+    virtual void turnOffLevel(int level);
 
-    void turnOnColumn(int column);
+    virtual void turnOnColumn(int column);
 
-    void turnOffColumn(int column);    
+    virtual void turnOffColumn(int column);    
 
-    void toggleBrightness(byte value);
+    virtual void toggleBrightness(byte value);
 
-    void initializePins();
+    virtual void initializePins();
 };
 
 #endif

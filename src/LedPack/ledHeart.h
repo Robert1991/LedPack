@@ -6,7 +6,7 @@
 const int HEART_LED_COUNT = 14;
 const int HEART_LEVEL_COUNT = 6;
 const int HEART_COLUMN_COUNT = 7;
-
+const int HEART_MAX_BRIGHTNESS = 255;
 
 class LeftRegisterLevelActivator : public LevelActivator {
   public:
@@ -41,6 +41,8 @@ class LedHeart {
     bool alreadyTurnedOn(int *turnedOn, int arrayLength, int ledIndex);
 
   public:
+    LedHeart();
+
     LedHeart(IStandardFunctions *stdFunctions, LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister);
 
     void initialize();

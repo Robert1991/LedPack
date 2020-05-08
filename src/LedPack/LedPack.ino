@@ -82,24 +82,29 @@ class ArduinoWrapper : public IArduinoWrapper {
 
 class ArduinoStandardFunctions : public IStandardFunctions {
   public:
-    int maxValue(int firstValue, int secondValue) {
+    long maxValue(long firstValue, long secondValue) {
       return max(firstValue, secondValue);
     }
 
-    int minValue(int firstValue, int secondValue) {
+    long minValue(long firstValue, long secondValue) {
       return min(firstValue, secondValue);
     }
 
-    int mapValue(int value, int currentLower, int currentUpper, int maximumUpper, int maximumLower) {
-      return map(value, currentLower, currentUpper, maximumUpper, maximumLower);
+    long mapValue(long value, long inLower, long inUpper, long outLower, long outUpper) {
+      return map(value, inLower, inUpper, outLower, outUpper);
     }
 
-    int getCurrentMilliseconds() {
+    long getCurrentMilliseconds() {
       return millis();
     }
 
     int nextRandomInt() {
       return rand();
+    }
+
+    int nextRandomIntInBounds(int lower, int upper) 
+    {
+        return lower + rand() % ( upper - lower + 1 );
     }
 };
 
@@ -170,6 +175,6 @@ void setup()
 void loop()
 {
   //bassFilterShow.executeIteration(550);
-  //movementShow.executeIteration();
-  lightShow.execute();
+  movementShow.executeIteration();
+  //lightShow.execute();
 }

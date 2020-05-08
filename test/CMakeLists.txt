@@ -2,6 +2,7 @@ add_executable(
     unit_tests
     Microphone-test.cpp
     ShiftRegister-test.cpp
+    LedHeart-test.cpp
     LedHeart-LevelActivator-test.cpp
     LedHeart-ColumnActivator-test.cpp
 )

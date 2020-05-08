@@ -128,6 +128,10 @@ void RightRegisterColumnActivator::turnOffColumn(int column, Led *leds) {
   }
 }
 
+LedHeart::LedHeart() {
+  
+}
+
 LedHeart::LedHeart(IStandardFunctions *stdFunctions, LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister) {
   this -> stdFunctions = stdFunctions;
   this -> leftShiftRegister = leftShiftRegister;
@@ -150,11 +154,11 @@ void LedHeart::turnOffAll() {
 }
 
 void LedHeart::turnOn(int ledIndex) {
-  if (ledIndex >= 0 && ledIndex < 14) {
-    if (ledIndex < 7) {
+  if (ledIndex >= 0 && ledIndex < HEART_LED_COUNT) {
+    if (ledIndex < HEART_LED_COUNT/2) {
       leftShiftRegister -> turnOn(ledIndex);
     } else {
-      rightShiftRegister -> turnOn(ledIndex - 7);
+      rightShiftRegister -> turnOn(ledIndex - HEART_LED_COUNT/2);
     }
   }
 }
@@ -170,14 +174,14 @@ void LedHeart::turnOff(int ledIndex) {
 }
 
 void LedHeart::turnOnRandomly(int minLedsTurnedOn) {
-  if (minLedsTurnedOn <= HEART_LED_COUNT) {
-    int numberOfLedsTurnedOn = minLedsTurnedOn + ( stdFunctions -> nextRandomInt() % ( HEART_LED_COUNT - minLedsTurnedOn + 1 ) );
+  if (minLedsTurnedOn > 0 && minLedsTurnedOn <= HEART_LED_COUNT) {
+    int numberOfLedsTurnedOn = stdFunctions -> nextRandomIntInBounds(minLedsTurnedOn, HEART_LED_COUNT);
     int turnedOnLeds[numberOfLedsTurnedOn];
 
     for (int i = 0; i < numberOfLedsTurnedOn; i++) {
-      int nextLed = stdFunctions -> nextRandomInt() % 14;
+      int nextLed = stdFunctions -> nextRandomIntInBounds(0, 14);
       while (alreadyTurnedOn(turnedOnLeds, numberOfLedsTurnedOn, nextLed)) {
-        nextLed = stdFunctions -> nextRandomInt() % 14;
+        nextLed = stdFunctions -> nextRandomIntInBounds(0, 14);
       }
       turnedOnLeds[i] = nextLed;
     }
@@ -185,7 +189,7 @@ void LedHeart::turnOnRandomly(int minLedsTurnedOn) {
     this -> leftShiftRegister -> turnOffAll();
     this -> rightShiftRegister -> turnOffAll();
 
-    for (int i = 0; i < sizeof(turnedOnLeds); i++) {
+    for (int i = 0; i < numberOfLedsTurnedOn; i++) {
       int turnedOnLedIndex = turnedOnLeds[i];
 
       if (turnedOnLedIndex >= 7) {
@@ -212,7 +216,7 @@ void LedHeart::turnLevelOff(int level) {
 }
 
 void LedHeart::turnColumnOn(int column) {
-  if (column >= 1 && column <= 7) {
+  if (column >= 1 && column <= HEART_COLUMN_COUNT) {
     if (column <= 3) {
       rightShiftRegister -> turnOnColumn(column);
     } else if (column == 4) {
@@ -226,7 +230,7 @@ void LedHeart::turnColumnOn(int column) {
 
 
 void LedHeart::turnColumnOff(int column) {
-  if (column >= 1 && column <= 7) {
+  if (column >= 1 && column <= HEART_COLUMN_COUNT) {
     if (column <= 3) {
       rightShiftRegister -> turnOffColumn(column);
     } else if (column == 4) {
@@ -239,7 +243,7 @@ void LedHeart::turnColumnOff(int column) {
 }
 
 void LedHeart::toggleBrightness(int brightness) {
-  if (brightness >= 0 && brightness < 256) {
+  if (brightness >= 0 && brightness <= HEART_MAX_BRIGHTNESS) {
     this -> leftShiftRegister -> toggleBrightness(brightness);
     this -> rightShiftRegister -> toggleBrightness(brightness);
   }
