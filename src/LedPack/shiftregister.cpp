@@ -19,9 +19,11 @@ void Led::turnOff() {
   on = false;
 }
 
-LevelActivator::LevelActivator() {}
+LevelActivator::LevelActivator() { }
 
-ColumnActivator::ColumnActivator() {}
+ColumnActivator::ColumnActivator() { }
+
+LedShiftRegister::LedShiftRegister() { }
 
 LedShiftRegister::LedShiftRegister(LedShiftRegisterPins pins, Led *ledsOnShiftRegister, LevelActivator *levelActivator, ColumnActivator *columnActivator, IArduinoWrapper *arduinoEnv) {
   this -> pins = pins;
@@ -32,10 +34,6 @@ LedShiftRegister::LedShiftRegister(LedShiftRegisterPins pins, Led *ledsOnShiftRe
   for (int i = 0; i < MAX_SHIFT_REGISTER_LED_COUNT; i++) {
     this->leds[i] = ledsOnShiftRegister[i];
   }
-}
-
-LedShiftRegister::LedShiftRegister() {
-
 }
 
 void LedShiftRegister::updateShiftRegisterByte() {

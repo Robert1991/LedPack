@@ -1,136 +1,114 @@
 #include "ledHeart.h"
 #include "shiftregister.h"
 
+// Level Activator
 void LeftRegisterLevelActivator::turnOnLevel(int level, Led *leds) {
-  if (level == 1) {
-    leds[0].turnOn();
-  } else if (level == 2) {
-    leds[1].turnOn();
-  } else if (level == 3) {
-    leds[2].turnOn();
-  } else if (level == 4) {
-    leds[3].turnOn();
-  } else if (level == 5) {
-    leds[4].turnOn();
-    leds[6].turnOn();
-  } else if (level == 6) {
-    leds[5].turnOn();
-  }
+  void (Led::*ledFunctionPointer)() = &Led::turnOn;
+  doForLevel(level, leds, ledFunctionPointer);
 }
 
 void LeftRegisterLevelActivator::turnOffLevel(int level, Led *leds) {
-  if (level == 1) {
-    leds[0].turnOff();
-  } else if (level == 2) {
-    leds[1].turnOff();
-  } else if (level == 3) {
-    leds[2].turnOff();
-  } else if (level == 4) {
-    leds[3].turnOff();
-  } else if (level == 5) {
-    leds[4].turnOff();
-    leds[6].turnOff();
-  } else if (level == 6) {
-    leds[5].turnOff();
-  }
+  void (Led::*ledFunctionPointer)() = &Led::turnOff;
+  doForLevel(level, leds, ledFunctionPointer);
 }
-void RightRegisterLevelActivator::turnOnLevel(int level, Led *leds) {
+
+void LeftRegisterLevelActivator::doForLevel(int level, Led *leds, void (Led::*ledFunctionPointer)()) {
   if (level == 1) {
-    // there is no level 1 for this
+    (leds[0].*ledFunctionPointer)();
   } else if (level == 2) {
-    leds[6].turnOn();
+    (leds[1].*ledFunctionPointer)();
   } else if (level == 3) {
-    leds[5].turnOn();
+    (leds[2].*ledFunctionPointer)();
   } else if (level == 4) {
-    leds[0].turnOn();
-    leds[4].turnOn();
+    (leds[3].*ledFunctionPointer)();
   } else if (level == 5) {
-    leds[1].turnOn();
-    leds[3].turnOn();
+    (leds[4].*ledFunctionPointer)();
+    (leds[6].*ledFunctionPointer)();
   } else if (level == 6){
-    leds[2].turnOn();
-  }
-}
-void RightRegisterLevelActivator::turnOffLevel(int level, Led *leds) {
-  if (level == 1) {
-    // there is no level 1 for this
-  } else if (level == 2) {
-    leds[6].turnOff();
-  } else if (level == 3) {
-    leds[5].turnOff();
-  } else if (level == 4) {
-    leds[0].turnOff();
-    leds[4].turnOff();
-  } else if (level == 5) {
-    leds[1].turnOff();
-    leds[3].turnOff();
-  } else if (level == 6){
-    leds[2].turnOff();
-  }
-}
-void LeftRegisterColumnActivator::turnOnColumn(int column, Led *leds) {
-  if (column == 1) {
-    leds[4].turnOn();
-  } else if (column == 2) {
-    leds[3].turnOn();
-    leds[2].turnOn();
-    leds[5].turnOn();
-  } else if (column == 3) {
-    leds[1].turnOn();
-    leds[6].turnOn();
-  } else if (column == 4) {
-    leds[0].turnOn();
+    (leds[5].*ledFunctionPointer)();
   }
 }
 
+void RightRegisterLevelActivator::turnOnLevel(int level, Led *leds) {
+  void (Led::*ledFunctionPointer)() = &Led::turnOn;
+  doForLevel(level, leds, ledFunctionPointer);
+}
+void RightRegisterLevelActivator::turnOffLevel(int level, Led *leds) {
+  void (Led::*ledFunctionPointer)() = &Led::turnOff;
+  doForLevel(level, leds, ledFunctionPointer);
+}
+
+void RightRegisterLevelActivator::doForLevel(int level, Led *leds, void (Led::*ledFunctionPointer)()) {
+  if (level == 1) {
+    // there is no level 1 for this
+  } else if (level == 2) {
+    (leds[6].*ledFunctionPointer)();
+  } else if (level == 3) {
+    (leds[5].*ledFunctionPointer)();
+  } else if (level == 4) {
+    (leds[0].*ledFunctionPointer)();
+    (leds[4].*ledFunctionPointer)();
+  } else if (level == 5) {
+    (leds[1].*ledFunctionPointer)();
+    (leds[3].*ledFunctionPointer)();
+  } else if (level == 6){
+    (leds[2].*ledFunctionPointer)();
+  }
+}
+
+// Column Activator
+void LeftRegisterColumnActivator::turnOnColumn(int column, Led *leds) {
+  void (Led::*ledFunctionPointer)() = &Led::turnOn;
+  doForColumn(column, leds, ledFunctionPointer);
+}
+
 void LeftRegisterColumnActivator::turnOffColumn(int column, Led *leds) {
+  void (Led::*ledFunctionPointer)() = &Led::turnOff;
+  doForColumn(column, leds, ledFunctionPointer);
+}
+
+void LeftRegisterColumnActivator::doForColumn(int column, Led *leds, void (Led::*ledFunctionPointer)()) {
   if (column == 1) {
-    leds[4].turnOff();
+    (leds[4].*ledFunctionPointer)();
   } else if (column == 2) {
-    leds[3].turnOff();
-    leds[2].turnOff();
-    leds[5].turnOff();
+    (leds[3].*ledFunctionPointer)();
+    (leds[2].*ledFunctionPointer)();
+    (leds[5].*ledFunctionPointer)();
   } else if (column == 3) {
-    leds[1].turnOff();
-    leds[6].turnOff();
+    (leds[1].*ledFunctionPointer)();
+    (leds[6].*ledFunctionPointer)();
   } else if (column == 4){
-    leds[0].turnOff();
+    (leds[0].*ledFunctionPointer)();
   }
 }
 
 void RightRegisterColumnActivator::turnOnColumn(int column, Led *leds) {
-  if (column == 1) {
-    leds[3].turnOn();
-  } else if (column == 2) {
-    leds[2].turnOn();
-    leds[4].turnOn();
-    leds[5].turnOn();
-  } else if (column == 3) {
-    leds[1].turnOn();
-    leds[6].turnOn();
-  } else if (column == 4){
-    leds[0].turnOn();
-  }
+  void (Led::*ledFunctionPointer)() = &Led::turnOn;
+  doForColumn(column, leds, ledFunctionPointer);
 }
 
 void RightRegisterColumnActivator::turnOffColumn(int column, Led *leds) {
+  void (Led::*ledFunctionPointer)() = &Led::turnOff;
+  doForColumn(column, leds, ledFunctionPointer);
+}
+
+void RightRegisterColumnActivator::doForColumn(int column, Led *leds, void (Led::*ledFunctionPointer)()) {
   if (column == 1) {
-    leds[3].turnOff();
+    (leds[3].*ledFunctionPointer)();
   } else if (column == 2) {
-    leds[2].turnOff();
-    leds[4].turnOff();
-    leds[5].turnOff();
+    (leds[2].*ledFunctionPointer)();
+    (leds[4].*ledFunctionPointer)();
+    (leds[5].*ledFunctionPointer)();
   } else if (column == 3) {
-    leds[1].turnOff();
-    leds[6].turnOff();
+    (leds[1].*ledFunctionPointer)();
+    (leds[6].*ledFunctionPointer)();
   } else if (column == 4){
-    leds[0].turnOff();
+    (leds[0].*ledFunctionPointer)();
   }
 }
 
-LedHeart::LedHeart() {
-  
-}
+// Led Heart
+LedHeart::LedHeart() { }
 
 LedHeart::LedHeart(IStandardFunctions *stdFunctions, LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister) {
   this -> stdFunctions = stdFunctions;
@@ -154,23 +132,13 @@ void LedHeart::turnOffAll() {
 }
 
 void LedHeart::turnOn(int ledIndex) {
-  if (ledIndex >= 0 && ledIndex < HEART_LED_COUNT) {
-    if (ledIndex < HEART_LED_COUNT/2) {
-      leftShiftRegister -> turnOn(ledIndex);
-    } else {
-      rightShiftRegister -> turnOn(ledIndex - HEART_LED_COUNT/2);
-    }
-  }
+  void (LedShiftRegister::*ledShiftRegisterTurnLedOn)(int) = &LedShiftRegister::turnOn;
+  doForLed(ledIndex, ledShiftRegisterTurnLedOn);
 }
 
 void LedHeart::turnOff(int ledIndex) {
-  if (ledIndex >= 0 && ledIndex < 14) {
-    if (ledIndex < 7) {
-      leftShiftRegister -> turnOff(ledIndex);
-    } else {
-      rightShiftRegister -> turnOff(ledIndex - 7);
-    }
-  }
+  void (LedShiftRegister::*ledShiftRegisterTurnLedOff)(int) = &LedShiftRegister::turnOff;
+  doForLed(ledIndex, ledShiftRegisterTurnLedOff);
 }
 
 void LedHeart::turnOnRandomly(int minLedsTurnedOn) {
@@ -186,66 +154,67 @@ void LedHeart::turnOnRandomly(int minLedsTurnedOn) {
       turnedOnLeds[i] = nextLed;
     }
 
-    this -> leftShiftRegister -> turnOffAll();
-    this -> rightShiftRegister -> turnOffAll();
-
+    turnOffAll();
     for (int i = 0; i < numberOfLedsTurnedOn; i++) {
-      int turnedOnLedIndex = turnedOnLeds[i];
-
-      if (turnedOnLedIndex >= 7) {
-        this -> rightShiftRegister -> turnOn(turnedOnLedIndex - 7);
-      } else {
-        this -> leftShiftRegister -> turnOn(turnedOnLedIndex);
-      }
+      turnOn(turnedOnLeds[i]);
     }
   }
 }
 
 void LedHeart::turnLevelOn(int level) {
-  if (level >= 1 && level <= HEART_LEVEL_COUNT) {
-    leftShiftRegister -> turnOnLevel(level);
-    rightShiftRegister -> turnOnLevel(level);
-  }
+  void (LedShiftRegister::*ledShiftRegisterTurnLevelOn)(int) = &LedShiftRegister::turnOnLevel;
+  doForLevel(level, ledShiftRegisterTurnLevelOn);
 }
 
 void LedHeart::turnLevelOff(int level) {
-  if (level >= 1 && level <= HEART_LEVEL_COUNT) {
-    leftShiftRegister -> turnOffLevel(level);
-    rightShiftRegister -> turnOffLevel(level);
-  }
+  void (LedShiftRegister::*ledShiftRegisterTurnLevelOff)(int) = &LedShiftRegister::turnOffLevel;
+  doForLevel(level, ledShiftRegisterTurnLevelOff);
 }
 
 void LedHeart::turnColumnOn(int column) {
-  if (column >= 1 && column <= HEART_COLUMN_COUNT) {
-    if (column <= 3) {
-      rightShiftRegister -> turnOnColumn(column);
-    } else if (column == 4) {
-      rightShiftRegister -> turnOnColumn(column);
-      leftShiftRegister -> turnOnColumn(column);
-    } else if (column > 4) {
-      leftShiftRegister -> turnOnColumn(HEART_COLUMN_COUNT + 1 - column);
-    }
-  }
+  void (LedShiftRegister::*ledShiftRegisterTurnColumnOff)(int) = &LedShiftRegister::turnOnColumn;
+  doForColumn(column, ledShiftRegisterTurnColumnOff);
 }
 
-
 void LedHeart::turnColumnOff(int column) {
-  if (column >= 1 && column <= HEART_COLUMN_COUNT) {
-    if (column <= 3) {
-      rightShiftRegister -> turnOffColumn(column);
-    } else if (column == 4) {
-      rightShiftRegister -> turnOffColumn(column);
-      leftShiftRegister -> turnOffColumn(column);
-    } else if (column > 4) {
-      leftShiftRegister -> turnOffColumn(HEART_COLUMN_COUNT + 1 - column);
-    }
-  }
+  void (LedShiftRegister::*ledShiftRegisterTurnColumnOff)(int) = &LedShiftRegister::turnOffColumn;
+  doForColumn(column, ledShiftRegisterTurnColumnOff);
 }
 
 void LedHeart::toggleBrightness(int brightness) {
   if (brightness >= 0 && brightness <= HEART_MAX_BRIGHTNESS) {
     this -> leftShiftRegister -> toggleBrightness(brightness);
     this -> rightShiftRegister -> toggleBrightness(brightness);
+  }
+}
+
+void LedHeart::doForLevel(int level, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int)) {
+  if (level >= 1 && level <= HEART_LEVEL_COUNT) {
+    (leftShiftRegister->*shiftRegisterFunctionPointer)(level);
+    (rightShiftRegister->*shiftRegisterFunctionPointer)(level);
+  }
+}
+
+void LedHeart::doForColumn(int column, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int)) {
+  if (column >= 1 && column <= HEART_COLUMN_COUNT) {
+    if (column <= 3) {
+      (rightShiftRegister->*shiftRegisterFunctionPointer)(column);
+    } else if (column == 4) {
+      (rightShiftRegister->*shiftRegisterFunctionPointer)(column);
+      (leftShiftRegister->*shiftRegisterFunctionPointer)(column);
+    } else if (column > 4) {
+      (leftShiftRegister->*shiftRegisterFunctionPointer)(HEART_COLUMN_COUNT + 1 - column);
+    }
+  }
+}
+
+void LedHeart::doForLed(int ledIndex, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int)) {
+  if (ledIndex >= 0 && ledIndex < HEART_LED_COUNT) {
+    if (ledIndex < HEART_LED_COUNT/2) {
+      (leftShiftRegister->*shiftRegisterFunctionPointer)(ledIndex);
+    } else {
+      (rightShiftRegister->*shiftRegisterFunctionPointer)(ledIndex - HEART_LED_COUNT/2);
+    }
   }
 }
 

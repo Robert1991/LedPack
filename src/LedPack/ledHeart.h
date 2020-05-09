@@ -9,24 +9,36 @@ const int HEART_COLUMN_COUNT = 7;
 const int HEART_MAX_BRIGHTNESS = 255;
 
 class LeftRegisterLevelActivator : public LevelActivator {
+  private:
+   void doForLevel(int level, Led *leds, void (Led::*ledFunctionPointer)());
+
   public:
     void turnOnLevel(int level, Led *leds);
     void turnOffLevel(int level, Led *leds);
 };
 
 class RightRegisterLevelActivator : public LevelActivator {
+  private:
+    void doForLevel(int level, Led *leds, void (Led::*ledFunctionPointer)());
+
   public:
     void turnOnLevel(int level, Led *leds);
     void turnOffLevel(int level, Led *leds);
 };
 
 class LeftRegisterColumnActivator : public ColumnActivator {
+  private:
+    void doForColumn(int column, Led *leds, void (Led::*ledFunctionPointer)());
+
   public:
     void turnOnColumn(int column, Led *leds);
     void turnOffColumn(int column, Led *leds);
 };
 
 class RightRegisterColumnActivator : public ColumnActivator {
+  private:
+    void doForColumn(int column, Led *leds, void (Led::*ledFunctionPointer)());
+
   public:
     void turnOnColumn(int column, Led *leds);
     void turnOffColumn(int column, Led *leds);
@@ -39,6 +51,9 @@ class LedHeart {
     IStandardFunctions *stdFunctions;
     
     bool alreadyTurnedOn(int *turnedOn, int arrayLength, int ledIndex);
+    void doForColumn(int column, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int));
+    void doForLevel(int level, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int));
+    void doForLed(int ledIndex, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int));
 
   public:
     LedHeart();
