@@ -5,6 +5,7 @@
 #include "gmock/gmock.h"
 #include "arduinoWrapper.h"
 #include "shiftregister.h"
+#include "gyroscope.h"
 
 using namespace std::chrono;
 
@@ -151,7 +152,7 @@ public:
     MOCK_METHOD(void, initializePins, (), (override));
 };
 
-
+// Namespace functions
 class STDNamespaceFunctions : public IStandardFunctions
 {
 public:
@@ -178,7 +179,7 @@ public:
 
     int nextRandomInt()
     {
-        return std::rand();;
+        return std::rand();
     }
 
     int nextRandomIntInBounds(int lower, int upper) 
@@ -196,6 +197,24 @@ public:
     MOCK_METHOD(long, getCurrentMilliseconds, (), (override));
     MOCK_METHOD(int, nextRandomInt, (), (override));
     MOCK_METHOD(int, nextRandomIntInBounds, (int lower, int upper), (override));
+};
+
+
+class DummyAccelerationRatioMapper : public IAccelerationRatioMapper {
+    public:
+        DummyAccelerationRatioMapper() {};
+        virtual int mapToInt(float accelerationRatio) {
+            return (int)(accelerationRatio * 100);
+        }
+};
+
+
+// Wire
+class WireMock : public GyroscopeWire {
+  public:
+    MOCK_METHOD(void, initialize, (), (override));
+    MOCK_METHOD(void, requestMeasurement, (), (override));
+    MOCK_METHOD(int, readNextRegister, (), (override));
 };
 
 #endif

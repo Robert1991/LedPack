@@ -59,4 +59,13 @@ class IStandardFunctions {
     virtual int nextRandomIntInBounds(int lower, int upper) = 0;
 };
 
+class GyroscopeWire {
+  public:
+    virtual void initialize() = 0;
+
+    virtual void requestMeasurement() = 0;
+    
+    virtual int readNextRegister() = 0;
+};
+
 #endif

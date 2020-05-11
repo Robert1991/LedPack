@@ -1,5 +1,4 @@
 #include "gyroscope.h"
-#include "Arduino.h"
 
 AccelerationMeasurementVector::AccelerationMeasurementVector(int accX, int accY, int accZ) {
   this -> accX = accX;
@@ -13,20 +12,24 @@ AccelerationMeasurementVector::AccelerationMeasurementVector() {
   this -> accZ = 0;
 }
 
-static AccelerationMeasurementVector AccelerationMeasurementVector::defaultVector() {
+AccelerationMeasurementVector AccelerationMeasurementVector::defaultVector() {
   return AccelerationMeasurementVector(0, 0, 0);
 }
 
 AccerlationVectorDifference AccelerationMeasurementVector::euclideanDistanceTo(AccelerationMeasurementVector otherVector) {
-  float euclideanDistance = sqrt(pow(this -> accX - otherVector.accX, 2) + pow(this -> accY - otherVector.accY, 2) + pow(this -> accZ - otherVector.accZ, 2));
+  float euclideanDistance = sqrt(pow(this -> accX - otherVector.accX, 2) + 
+                                 pow(this -> accY - otherVector.accY, 2) + 
+                                 pow(this -> accZ - otherVector.accZ, 2));
   float accRatio = euclideanDistance / MAX_ACCELERATION_VECTOR_DIFFERENCE;
   return AccerlationVectorDifference(euclideanDistance, accRatio);
 }
 
-void AccelerationMeasurementVector::printOut() {
-  Serial.print("X = "); Serial.print(accX);
-  Serial.print(" | Y = "); Serial.print(accY);
-  Serial.print(" | Z = "); Serial.println(accZ);
+bool operator==(const AccelerationMeasurementVector &lhs, const AccelerationMeasurementVector &rhs) {
+  return lhs.accX == rhs.accX && lhs.accY == rhs.accY && lhs.accZ == rhs.accZ;  
+}
+
+bool operator!=(const AccelerationMeasurementVector &lhs, const AccelerationMeasurementVector &rhs) {
+    return !(lhs == rhs);
 }
 
 AccerlationVectorDifference::AccerlationVectorDifference(float rawDifference, float differenceRatio) {
@@ -42,32 +45,38 @@ bool AccerlationVectorDifference::overThreshold(float rawValue) {
   return (this -> rawDifference) > rawValue;
 }
 
-Gyroscope::Gyroscope(int mpuAdress) {
-  this -> mpuAdress = mpuAdress;
+bool operator==(const AccerlationVectorDifference &lhs, const AccerlationVectorDifference &rhs) {
+  return (fabs(lhs.differenceRatio - rhs.differenceRatio) < 0.005f) && 
+         (fabs(lhs.rawDifference - rhs.rawDifference) < 0.005f);
+}
+
+bool operator!=(const AccerlationVectorDifference &lhs, const AccerlationVectorDifference &rhs) {
+    return !(lhs == rhs);
+}
+
+Gyroscope::Gyroscope(GyroscopeWire *wire) {
+  this -> wire = wire;
+}
+
+Gyroscope::Gyroscope() {
+
 }
 
 AccelerationMeasurementVector Gyroscope::measureAcceleration() {
   requestMeasurement();
 
   int accX; int accY; int accZ;
-  accX = Wire.read() << 8 | Wire.read();
-  accY = Wire.read() << 8 | Wire.read();
-  accZ = Wire.read() << 8 | Wire.read();
+  accX = wire -> readNextRegister();
+  accY = wire -> readNextRegister();
+  accZ = wire -> readNextRegister();
 
   return AccelerationMeasurementVector(accX, accY, accZ);
 }
 
 void Gyroscope::wakeUp() {
-  Wire.begin();
-  Wire.beginTransmission(mpuAdress); // Begins a transmission to the I2C slave (GY-521 board)
-  Wire.write(0x6B); // PWR_MGMT_1 register
-  Wire.write(0); // set to zero (wakes up the MPU-6050)
-  Wire.endTransmission(true);
+  this -> wire -> initialize();
 }
 
 void Gyroscope::requestMeasurement() {
-  Wire.beginTransmission(mpuAdress);
-  Wire.write(0x3B); // starting with register 0x3B (ACCEL_XOUT_H) [MPU-6000 and MPU-6050 Register Map and Descriptions Revision 4.2, p.40]
-  Wire.endTransmission(false); // the parameter indicates that the Arduino will send a restart. As a result, the connection is kept active.
-  Wire.requestFrom(mpuAdress, 12, true); // request a total of 7*2=14 registers
+  this -> wire -> requestMeasurement();
 }
