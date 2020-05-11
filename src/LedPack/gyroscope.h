@@ -1,7 +1,8 @@
 #ifndef gyroscope_h
 #define gyroscope_h
 
-#include "Wire.h"
+#include "arduinoWrapper.h"
+#include <math.h>
 
 const float MAX_ACCELERATION_VECTOR_DIFFERENCE = 65536.0;
 
@@ -23,6 +24,10 @@ class AccerlationVectorDifference {
     int mapAccelerationRatioTo(IAccelerationRatioMapper *mapper);
 
     bool overThreshold(float rawValue);
+
+    friend bool operator==(const AccerlationVectorDifference &lhs, const AccerlationVectorDifference &rhs);
+
+    friend bool operator!=(const AccerlationVectorDifference &lhs, const AccerlationVectorDifference &rhs);
 };
 
 class AccelerationMeasurementVector {
@@ -39,16 +44,21 @@ class AccelerationMeasurementVector {
 
     AccerlationVectorDifference euclideanDistanceTo(AccelerationMeasurementVector otherVector);
 
-    void printOut();
+    friend bool operator==(const AccelerationMeasurementVector &lhs, const AccelerationMeasurementVector &rhs);
+
+    friend bool operator!=(const AccelerationMeasurementVector &lhs, const AccelerationMeasurementVector &rhs);
 };
 
 class Gyroscope {
   private:
-    int mpuAdress;
+    GyroscopeWire *wire;
+
     void requestMeasurement();
 
   public:
-    Gyroscope(int mpuAdress);
+    Gyroscope();
+
+    Gyroscope(GyroscopeWire *wire);
 
     AccelerationMeasurementVector measureAcceleration();
 

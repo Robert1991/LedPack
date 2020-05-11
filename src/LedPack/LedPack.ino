@@ -1,3 +1,4 @@
+#include "Wire.h"
 #include "gyroscope.h"
 #include "microphone.h"
 #include "lowPassFilter.h"
@@ -8,6 +9,7 @@
 #include "movementShow.h"
 #include "bassfilterShow.h"
 #include "arduinoWrapper.h"
+
 
 class ArduinoWrapper : public IArduinoWrapper {
   public:
@@ -108,6 +110,35 @@ class ArduinoStandardFunctions : public IStandardFunctions {
     }
 };
 
+class ArduinoWire : public GyroscopeWire {
+  private:
+    int mpuAddress;
+
+  public:
+    ArduinoWire(int mpuAddress) {
+      this->mpuAddress = mpuAddress;
+    }
+
+    void initialize() {
+      Wire.begin();
+      Wire.beginTransmission(mpuAddress); // Begins a transmission to the I2C slave (GY-521 board)
+      Wire.write(0x6B); // PWR_MGMT_1 register
+      Wire.write(0); // set to zero (wakes up the MPU-6050)
+      Wire.endTransmission(true);
+    }
+
+    void requestMeasurement() {
+      Wire.beginTransmission(mpuAddress);
+      Wire.write(0x3B); // starting with register 0x3B (ACCEL_XOUT_H) [MPU-6000 and MPU-6050 Register Map and Descriptions Revision 4.2, p.40]
+      Wire.endTransmission(false); // the parameter indicates that the Arduino will send a restart. As a result, the connection is kept active.
+      Wire.requestFrom(mpuAddress, 12, true); // request a total of 7*2=12 registers?
+    }
+    
+    int readNextRegister() {
+      return Wire.read() << 8 | Wire.read();
+    }
+};
+
 ArduinoWrapper *arduinoEnv = new ArduinoWrapper();
 IStandardFunctions *arduinoStdFunctions = new ArduinoStandardFunctions();
 
@@ -145,7 +176,7 @@ LightShow lightShow = LightShow(arduinoEnv, ledHeart);
 // Movement show initialization
 const float changeLightsThreshold = 12000.0;
 const int MPU_ADDR = 0x68; // I2C address of the MPU-6050. If AD0 pin is set to HIGH, the I2C address will be 0x69.
-Gyroscope *gyroscope = new Gyroscope(MPU_ADDR);
+Gyroscope *gyroscope = new Gyroscope(new ArduinoWire(MPU_ADDR));
 MovementShow movementShow = MovementShow(ledHeart, gyroscope, arduinoEnv, changeLightsThreshold);
 
 

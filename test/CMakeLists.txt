@@ -1,10 +1,11 @@
 add_executable(
     unit_tests
-    Microphone-test.cpp
-    ShiftRegister-test.cpp
+    Gyroscope-test.cpp
     LedHeart-test.cpp
     LedHeart-LevelActivator-test.cpp
     LedHeart-ColumnActivator-test.cpp
+    Microphone-test.cpp
+    ShiftRegister-test.cpp
 )
 
 target_link_libraries(
@@ -15,6 +16,7 @@ target_link_libraries(
     shiftRegister
     ledHeart
     arduinoWrapper
+    gyroscope
 )
 
 add_test(

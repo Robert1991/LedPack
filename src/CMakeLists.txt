@@ -1,6 +1,7 @@
 add_library(microphone "")
 add_library(shiftRegister "")
 add_library(ledHeart "")
+add_library(gyroscope "")
 add_library(arduinoWrapper INTERFACE)
 
 target_sources(
@@ -13,6 +14,20 @@ target_sources(
 
 target_include_directories(
     microphone
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}
+)
+
+target_sources(
+    gyroscope
+    PRIVATE
+        LedPack/gyroscope.cpp
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/LedPack/gyroscope.h
+    )
+
+target_include_directories(
+    gyroscope
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}
 )
