@@ -177,6 +177,7 @@ LightShow lightShow = LightShow(arduinoEnv, ledHeart);
 const float changeLightsThreshold = 12000.0;
 const int MPU_ADDR = 0x68; // I2C address of the MPU-6050. If AD0 pin is set to HIGH, the I2C address will be 0x69.
 Gyroscope *gyroscope = new Gyroscope(new ArduinoWire(MPU_ADDR));
+
 MovementShow movementShow = MovementShow(gyroscope);
 RandomLedBlinkMovementShow *randomBlinkMovementShow = new RandomLedBlinkMovementShow(ledHeart, new LedBrightnessAccelerationRatioMapper(35, 10),
                                                                                      arduinoEnv, changeLightsThreshold);

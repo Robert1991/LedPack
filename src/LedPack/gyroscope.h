@@ -32,6 +32,9 @@ class AccerlationVectorDifference {
     friend bool operator!=(const AccerlationVectorDifference &lhs, const AccerlationVectorDifference &rhs);
 
     friend bool operator!=(const AccerlationVectorDifference *lhs, const AccerlationVectorDifference &rhs);
+
+    friend bool operator!=(const AccerlationVectorDifference &lhs, const AccerlationVectorDifference &rhs);
+
 };
 
 class AccelerationMeasurementVector {

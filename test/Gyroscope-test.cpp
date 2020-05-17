@@ -81,7 +81,7 @@ TEST_F(GyroscopeTest, testThatTheAccerlationVectorDifferenceDelegatesTheAccelera
                       .mapAccelerationRatioTo(new DummyAccelerationRatioMapper()), Eq(0));
 }
 
-TEST_F(GyroscopeTest, testThatTheVectorDifferenceIsNotOverTheThresholdWhenTheGivenThresholdIsEqualThanTheRawVectorDifference) {
+TEST_F(GyroscopeTest, testThatTheGivenRawInputIsOnlyOverTheThresholdWhenItIsGreaterThanTheDetectedThreshold) {
     AccelerationMeasurementVector firstVector = AccelerationMeasurementVector(1, 1, 1);
     AccelerationMeasurementVector secondVector = AccelerationMeasurementVector(2, 2, 2);
     EXPECT_THAT(firstVector.euclideanDistanceTo(secondVector)
@@ -100,4 +100,10 @@ TEST_F(GyroscopeTest, testThatTheVectorDifferenceIsNotOverTheThresholdWhenTheGiv
     AccelerationMeasurementVector secondVector = AccelerationMeasurementVector(2, 2, 2);
     EXPECT_THAT(firstVector.euclideanDistanceTo(secondVector)
                            .overThreshold(3), Eq(false));
+
+TEST_F(GyroscopeTest, testThatTheGivenRawInputIsOnlyOverThresholdWhenItIsGreaterThanTheDetectedThreshold) {
+    AccelerationMeasurementVector firstVector = AccelerationMeasurementVector(1, 1, 1);
+    AccelerationMeasurementVector secondVector = AccelerationMeasurementVector(2, 2, 2);
+    EXPECT_THAT(firstVector.euclideanDistanceTo(secondVector)
+                           .overThreshold(sqrt(3.01f)), Eq(true));
 }
