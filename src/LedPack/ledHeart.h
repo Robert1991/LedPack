@@ -78,9 +78,9 @@ class LedHeart {
 
     void turnColumnOff(int column);
 
-    void toggleBrightness(int brightness);
+    virtual void toggleBrightness(int brightness);
 
-    void turnOnRandomly(int minLedsTurnedOn = 0);
+    virtual void turnOnRandomly(int minLedsTurnedOn = 0);
 };
 
 #endif

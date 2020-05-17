@@ -6,6 +6,8 @@
 #include "arduinoWrapper.h"
 #include "shiftregister.h"
 #include "gyroscope.h"
+#include "ledHeart.h"
+#include "movementShow.h"
 
 using namespace std::chrono;
 
@@ -122,36 +124,6 @@ private:
     FakeArduinoEnvironment fakeEnv;
 };
 
-// Shiftregister
-class LevelActivatorMock : public LevelActivator
-{
-public:
-    MOCK_METHOD(void, turnOnLevel, (int level, Led *leds), (override));
-    MOCK_METHOD(void, turnOffLevel, (int level, Led *leds), (override));
-};
-
-class ColumnActivatorMock : public ColumnActivator
-{
-public:
-    MOCK_METHOD(void, turnOnColumn, (int column, Led *leds), (override));
-    MOCK_METHOD(void, turnOffColumn, (int column, Led *leds), (override));
-};
-
-class ShiftRegisterMock : public LedShiftRegister
-{
-public:
-    MOCK_METHOD(void, turnOn, (int ledIndex), (override));
-    MOCK_METHOD(void, turnOff, (int ledIndex), (override));
-    MOCK_METHOD(void, turnOffAll, (), (override));
-    MOCK_METHOD(void, turnOnAll, (), (override));
-    MOCK_METHOD(void, turnOnLevel, (int level), (override));
-    MOCK_METHOD(void, turnOffLevel, (int level), (override));
-    MOCK_METHOD(void, turnOnColumn, (int column), (override));
-    MOCK_METHOD(void, turnOffColumn, (int column), (override));
-    MOCK_METHOD(void, toggleBrightness, (byte value), (override));
-    MOCK_METHOD(void, initializePins, (), (override));
-};
-
 // Namespace functions
 class STDNamespaceFunctions : public IStandardFunctions
 {
@@ -199,6 +171,71 @@ public:
     MOCK_METHOD(int, nextRandomIntInBounds, (int lower, int upper), (override));
 };
 
+// LedHeart
+
+class LedHeartMock : public LedHeart 
+{
+public:
+    MOCK_METHOD(void, initialize, (), ());
+
+    MOCK_METHOD(void, turnOnAll, (), ());
+
+    MOCK_METHOD(void, turnOffAll, (), ());
+
+    MOCK_METHOD(void, turnOn, (int ledIndex), ());
+
+    MOCK_METHOD(void, turnOff, (int ledIndex), ());
+
+    MOCK_METHOD(void, turnLevelOn, (int level), ());
+
+    MOCK_METHOD(void, turnLevelOff, (int level), ());
+
+    MOCK_METHOD(void, turnColumnOn, (int column), ());
+
+    MOCK_METHOD(void, turnColumnOff, (int column), ());
+
+    MOCK_METHOD(void, toggleBrightness, (int brightness), (override));
+
+    MOCK_METHOD(void, turnOnRandomly, (int minLedsTurnedOn), (override));
+};
+
+// Shiftregister
+class LevelActivatorMock : public LevelActivator
+{
+public:
+    MOCK_METHOD(void, turnOnLevel, (int level, Led *leds), (override));
+    MOCK_METHOD(void, turnOffLevel, (int level, Led *leds), (override));
+};
+
+class ColumnActivatorMock : public ColumnActivator
+{
+public:
+    MOCK_METHOD(void, turnOnColumn, (int column, Led *leds), (override));
+    MOCK_METHOD(void, turnOffColumn, (int column, Led *leds), (override));
+};
+
+class ShiftRegisterMock : public LedShiftRegister
+{
+public:
+    MOCK_METHOD(void, turnOn, (int ledIndex), (override));
+    MOCK_METHOD(void, turnOff, (int ledIndex), (override));
+    MOCK_METHOD(void, turnOffAll, (), (override));
+    MOCK_METHOD(void, turnOnAll, (), (override));
+    MOCK_METHOD(void, turnOnLevel, (int level), (override));
+    MOCK_METHOD(void, turnOffLevel, (int level), (override));
+    MOCK_METHOD(void, turnOnColumn, (int column), (override));
+    MOCK_METHOD(void, turnOffColumn, (int column), (override));
+    MOCK_METHOD(void, toggleBrightness, (byte value), (override));
+    MOCK_METHOD(void, initializePins, (), (override));
+};
+
+
+// Gyroscope
+class GyroscopeMock : public Gyroscope {
+public:
+    MOCK_METHOD(AccelerationMeasurementVector, measureAcceleration, (), ());
+    MOCK_METHOD(void, wakeUp, (), ());
+};
 
 class DummyAccelerationRatioMapper : public IAccelerationRatioMapper {
     public:
@@ -215,6 +252,18 @@ class WireMock : public GyroscopeWire {
     MOCK_METHOD(void, initialize, (), (override));
     MOCK_METHOD(void, requestMeasurement, (), (override));
     MOCK_METHOD(int, readNextRegister, (), (override));
+};
+
+// Movement show
+class MovementShowActionMapperMock : public MovementShowActionMapper {
+public:
+    MovementShowActionMapperMock() : MovementShowActionMapper(nullptr, nullptr)
+    {
+        
+    }
+    ~MovementShowActionMapperMock() {}
+
+    MOCK_METHOD(void, mapToHeart, (AccerlationVectorDifference *difference), ());
 };
 
 #endif

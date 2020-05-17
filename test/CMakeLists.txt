@@ -5,6 +5,7 @@ add_executable(
     LedHeart-LevelActivator-test.cpp
     LedHeart-ColumnActivator-test.cpp
     Microphone-test.cpp
+    MovementShow-test.cpp
     ShiftRegister-test.cpp
 )
 
@@ -17,6 +18,7 @@ target_link_libraries(
     ledHeart
     arduinoWrapper
     gyroscope
+    movementShow
 )
 
 add_test(

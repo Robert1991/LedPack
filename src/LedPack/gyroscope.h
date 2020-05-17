@@ -27,7 +27,11 @@ class AccerlationVectorDifference {
 
     friend bool operator==(const AccerlationVectorDifference &lhs, const AccerlationVectorDifference &rhs);
 
+    friend bool operator==(const AccerlationVectorDifference *lhs, const AccerlationVectorDifference &rhs);
+
     friend bool operator!=(const AccerlationVectorDifference &lhs, const AccerlationVectorDifference &rhs);
+
+    friend bool operator!=(const AccerlationVectorDifference *lhs, const AccerlationVectorDifference &rhs);
 };
 
 class AccelerationMeasurementVector {
@@ -60,9 +64,9 @@ class Gyroscope {
 
     Gyroscope(GyroscopeWire *wire);
 
-    AccelerationMeasurementVector measureAcceleration();
+    virtual AccelerationMeasurementVector measureAcceleration();
 
-    void wakeUp();
+    virtual void wakeUp();
 };
 
 #endif

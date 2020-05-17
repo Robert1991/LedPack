@@ -50,7 +50,16 @@ bool operator==(const AccerlationVectorDifference &lhs, const AccerlationVectorD
          (fabs(lhs.rawDifference - rhs.rawDifference) < 0.005f);
 }
 
+bool operator==(const AccerlationVectorDifference *lhs, const AccerlationVectorDifference &rhs) {
+  return (fabs(lhs -> differenceRatio - rhs.differenceRatio) < 0.005f) && 
+         (fabs(lhs -> rawDifference - rhs.rawDifference) < 0.005f);
+}
+
 bool operator!=(const AccerlationVectorDifference &lhs, const AccerlationVectorDifference &rhs) {
+    return !(lhs == rhs);
+}
+
+bool operator!=(const AccerlationVectorDifference *lhs, const AccerlationVectorDifference &rhs) {
     return !(lhs == rhs);
 }
 
