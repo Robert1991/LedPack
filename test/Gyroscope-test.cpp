@@ -36,7 +36,7 @@ TEST_F(GyroscopeTest, testThatTheWireToTheGyroscopeGetsInitializedWhenTheGyrosco
 
 TEST_F(GyroscopeTest, testThatTheGyroscopeFirstRequestsTheMeasurementOfTheWireAndThenReadsTheNextThreeRegistersInOrderToDetermineTheAccelerationVector)
 {
-    AccelerationMeasurementVector reference = AccelerationMeasurementVector(1, 2, 3);
+    auto reference = AccelerationMeasurementVector(1, 2, 3);
     EXPECT_CALL(wireMock, requestMeasurement()).Times(Exactly(1));
     EXPECT_CALL(wireMock, readNextRegister()).Times(Exactly(3))
                                              .WillOnce(Return(reference.accX))
@@ -47,66 +47,57 @@ TEST_F(GyroscopeTest, testThatTheGyroscopeFirstRequestsTheMeasurementOfTheWireAn
 
 TEST_F(GyroscopeTest, testThatToAccelerationMeasurementVectorIsEqualToItSelf) 
 {
-    AccelerationMeasurementVector vector = AccelerationMeasurementVector(1, 2, 3);
+    auto vector = AccelerationMeasurementVector(1, 2, 3);
     ASSERT_EQ(vector, vector);
 }
 
 TEST_F(GyroscopeTest, testThatToAccelerationMeasurementVectorsAreEqualWhenTheyHaveTheSameAccerlerations) 
 {
-    AccelerationMeasurementVector vector1 = AccelerationMeasurementVector(1, 2, 3);
-    AccelerationMeasurementVector vector2 = AccelerationMeasurementVector(1, 2, 3);
-    ASSERT_EQ(vector1, vector2);
+    ASSERT_EQ(AccelerationMeasurementVector(1, 2, 3), AccelerationMeasurementVector(1, 2, 3));
 }
 
 TEST_F(GyroscopeTest, testThatToAccelerationMeasurementVectorsAreNotEqualWhenTheyDontHaveTheSameAccerlerations) 
 {
-    AccelerationMeasurementVector vector1 = AccelerationMeasurementVector(1, 2, 3);
-    AccelerationMeasurementVector vector2 = AccelerationMeasurementVector(3, 2, 1);
-    ASSERT_NE(vector1, vector2);
+    ASSERT_NE(AccelerationMeasurementVector(1, 2, 3), AccelerationMeasurementVector(3, 2, 1));
 }
 
 TEST_F(GyroscopeTest, testCalculatingTheEucledianDistanceBetween2AccelerationMeasurements) 
 {
-    AccelerationMeasurementVector firstVector = AccelerationMeasurementVector(1, 1, 1);
-    AccelerationMeasurementVector secondVector = AccelerationMeasurementVector(2, 2, 2);
     // sqrt ((1-2)^2 + (1-2)^2 + (1-2)^2) = sqrt(3)
-    EXPECT_THAT(firstVector.euclideanDistanceTo(secondVector), Eq(AccerlationVectorDifference(sqrt(3.00f), 
-                                                                                              sqrt(3.00f) / MAX_ACCELERATION_VECTOR_DIFFERENCE)));
+    EXPECT_THAT(AccelerationMeasurementVector(1, 1, 1).euclideanDistanceTo(AccelerationMeasurementVector(2, 2, 2)), 
+                Eq(AccerlationVectorDifference(sqrt(3.00f), sqrt(3.00f) / MAX_ACCELERATION_VECTOR_DIFFERENCE)));
 }
 
 TEST_F(GyroscopeTest, testThatTheEucledianDistanceIsZeroWhenCalculatingItToTheSameVector) 
 {
-    AccelerationMeasurementVector vector = AccelerationMeasurementVector(1, 1, 1);
+    auto vector = AccelerationMeasurementVector(1, 1, 1);
     EXPECT_THAT(vector.euclideanDistanceTo(vector), Eq(AccerlationVectorDifference(0.00f, 0.00f)));
 }
 
 TEST_F(GyroscopeTest, testThatTheAccerlationVectorDifferenceDelegatesTheAccelerationDifferenceRatioToTheGivenAccelerationRatioMapper) 
 {
-    AccelerationMeasurementVector vector = AccelerationMeasurementVector(1, 1, 1);
+    auto vector = AccelerationMeasurementVector(1, 1, 1);
     EXPECT_THAT(vector.euclideanDistanceTo(vector)
                       .mapAccelerationRatioTo(new DummyAccelerationRatioMapper()), Eq(0));
 }
 
 TEST_F(GyroscopeTest, testThatTheGivenRawInputIsOnlyOverTheThresholdWhenItIsGreaterThanTheDetectedThreshold) 
 {
-    AccelerationMeasurementVector firstVector = AccelerationMeasurementVector(1, 1, 1);
-    AccelerationMeasurementVector secondVector = AccelerationMeasurementVector(2, 2, 2);
-    EXPECT_THAT(firstVector.euclideanDistanceTo(secondVector)
-                           .overThreshold(sqrt(3.00f)), Eq(false));
+    EXPECT_THAT(AccelerationMeasurementVector(1, 1, 1).euclideanDistanceTo(AccelerationMeasurementVector(2, 2, 2))
+                                                      .overThreshold(sqrt(3.00f)), 
+                Eq(false));
 }
 
 TEST_F(GyroscopeTest, testThatTheVectorDifferenceIsNotOverTheThresholdWhenTheGivenThresholdIsGreaterThanTheRawVectorDifference) 
 {
-    AccelerationMeasurementVector firstVector = AccelerationMeasurementVector(1, 1, 1);
-    AccelerationMeasurementVector secondVector = AccelerationMeasurementVector(2, 2, 2);
-    EXPECT_THAT(firstVector.euclideanDistanceTo(secondVector)
-                           .overThreshold(3), Eq(false));
+    EXPECT_THAT(AccelerationMeasurementVector(1, 1, 1).euclideanDistanceTo(AccelerationMeasurementVector(2, 2, 2))
+                                                      .overThreshold(sqrt(3)), 
+                Eq(false));
 }
 
 TEST_F(GyroscopeTest, testThatTheVectorDifferenceIsOverTheThresholdWhenTheGivenThresholdIsSmallerThanTheRawVectorDifference) 
 {
-    AccelerationMeasurementVector firstVector = AccelerationMeasurementVector(1, 1, 1);
-    AccelerationMeasurementVector secondVector = AccelerationMeasurementVector(2, 2, 2);
-    EXPECT_THAT(firstVector.euclideanDistanceTo(secondVector)
-                           .overThreshold(sqrt(2.00f)), Eq(true));
+    EXPECT_THAT(AccelerationMeasurementVector(1, 1, 1).euclideanDistanceTo(AccelerationMeasurementVector(2, 2, 2))
+                                                      .overThreshold(sqrt(2.00f)), 
+                Eq(true));
 }
