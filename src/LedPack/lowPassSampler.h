@@ -16,8 +16,8 @@ class LowPassSampler {
     int applyToVolumneIterations;
 
     int calledInCurrentIteration = 0;
-    int minPeak = 1023;
-    int maxPeak = 0;
+    int minPeak = MAXIMUM_PEAK;
+    int maxPeak = MINIMUM_PEAK;
 
     void applyToVolumeIfNecassary();
     int readPeakFrom(int samples);

@@ -3,6 +3,8 @@ add_library(shiftRegister "")
 add_library(ledHeart "")
 add_library(gyroscope "")
 add_library(movementShow "")
+add_library(lowPassSampler "")
+add_library(lowPassFilter "")
 add_library(arduinoWrapper INTERFACE)
 
 target_sources(
@@ -71,6 +73,34 @@ target_sources(
 
 target_include_directories(
     movementShow
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}
+)
+
+target_sources(
+    lowPassSampler
+    PRIVATE
+        LedPack/lowPassSampler.cpp
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/LedPack/lowPassSampler.h
+    )
+
+target_include_directories(
+    lowPassSampler
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}
+)
+
+target_sources(
+    lowPassFilter
+    PRIVATE
+        LedPack/lowPassFilter.cpp
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/LedPack/lowPassFilter.h
+    )
+
+target_include_directories(
+    lowPassFilter
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}
 )

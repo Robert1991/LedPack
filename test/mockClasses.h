@@ -8,6 +8,8 @@
 #include "gyroscope.h"
 #include "ledHeart.h"
 #include "movementShow.h"
+#include "microphone.h"
+#include "lowPassFilter.h"
 
 using namespace std::chrono;
 
@@ -140,6 +142,10 @@ public:
 
     long mapValue(long value, long inLower, long inUpper, long outLower, long outUpper)
     {
+        if (inLower == inUpper) {
+            return outUpper;
+        }
+
         return (value - inLower) * (outUpper - outLower) / (inUpper - inLower) + outLower;
     }
 
@@ -254,6 +260,7 @@ class WireMock : public GyroscopeWire {
     MOCK_METHOD(int, readNextRegister, (), (override));
 };
 
+
 // Movement show
 class MovementShowActionMapperMock : public MovementShowActionMapper {
 public:
@@ -265,5 +272,25 @@ public:
 
     MOCK_METHOD(void, mapToHeart, (AccerlationVectorDifference *difference), ());
 };
+
+
+// Microphone
+class MicrophoneMock : public Microphone 
+{
+public:
+    MOCK_METHOD(void, init, (), (override));
+    
+    MOCK_METHOD(int, readAnalog, (), (override));
+
+    MOCK_METHOD(int, readDigital, (), (override));
+};
+
+// LowPassFilter
+class LowPassFilterMock : public ILowPassFilter {
+  public:
+    MOCK_METHOD(void, put, (int input), (override));
+    MOCK_METHOD(int, get, (), (override));
+};
+
 
 #endif

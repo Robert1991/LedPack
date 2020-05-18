@@ -15,11 +15,11 @@ class Microphone
 
     Microphone(IArduinoWrapper *arduinoEnv, int microphonePin, int digitalInputPin);
 
-    void init();
+    virtual void init();
     
-    int readAnalog();
+    virtual int readAnalog();
 
-    int readDigital();
+    virtual int readDigital();
 };
 
 #endif

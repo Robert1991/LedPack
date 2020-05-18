@@ -7,6 +7,7 @@ add_executable(
     Microphone-test.cpp
     MovementShow-test.cpp
     ShiftRegister-test.cpp
+    LowPassSampler-test.cpp
 )
 
 target_link_libraries(
@@ -19,6 +20,8 @@ target_link_libraries(
     arduinoWrapper
     gyroscope
     movementShow
+    lowPassFilter
+    lowPassSampler
 )
 
 add_test(

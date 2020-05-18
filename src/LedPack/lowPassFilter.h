@@ -30,5 +30,4 @@ class FloatBasedLowPassFilter : public ILowPassFilter {
     virtual int get();
 };
 
-
 #endif
