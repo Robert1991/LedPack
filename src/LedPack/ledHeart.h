@@ -62,13 +62,13 @@ class LedHeart {
 
     void initialize();
 
-    void turnOnAll();
+    virtual void turnOnAll();
 
-    void turnOffAll();
+    virtual void turnOffAll();
 
-    void turnOn(int ledIndex);
+    virtual void turnOn(int ledIndex);
 
-    void turnOff(int ledIndex);
+    virtual void turnOff(int ledIndex);
 
     void turnLevelOn(int level);
 

@@ -118,3 +118,22 @@ TEST_F(MovementShowTest, testThatTheRandomBlinkLedMovementShowMapsTheAccleration
     randomBlinkLedActionMapper -> mapToHeart(mappedDifference);
 }
 
+TEST_F(MovementShowTest, testThatTheSequentialLedHeartTurnOnShowMapsTheAccerlerationRatioToTheNumberOfHeartsOnTheLedHeartAndTurnsThemOnWithADelayAndFullBrightness) 
+{
+    auto randomBlinkLedActionMapper = new SequentialHeartTurnOnShow(&ledHeartMock, &testArduinoEnv);
+    auto mappedDifference = new AccerlationVectorDifference(999.0f, 0.50f);
+
+    EXPECT_CALL(ledHeartMock, turnOffAll()).Times(Exactly(1));
+    EXPECT_CALL(ledHeartMock, turnOn(Eq(0))).Times(Exactly(1));
+    EXPECT_CALL(ledHeartMock, turnOn(Eq(1))).Times(Exactly(1));
+    EXPECT_CALL(ledHeartMock, turnOn(Eq(2))).Times(Exactly(1));
+    EXPECT_CALL(ledHeartMock, turnOn(Eq(3))).Times(Exactly(1));
+    EXPECT_CALL(ledHeartMock, turnOn(Eq(4))).Times(Exactly(1));
+    EXPECT_CALL(ledHeartMock, turnOn(Eq(5))).Times(Exactly(1));
+    EXPECT_CALL(ledHeartMock, turnOn(Eq(6))).Times(Exactly(1));
+
+    EXPECT_CALL(testArduinoEnv, delayFor(Eq(10))).Times(Exactly(1));
+
+    randomBlinkLedActionMapper -> mapToHeart(mappedDifference);
+}
+

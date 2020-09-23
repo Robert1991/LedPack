@@ -19,25 +19,17 @@ int LedBrightnessAccelerationRatioMapper::mapToInt(float accelerationRatio) {
   }
 }
 
+LedCountOnHeartAccerlertionRationMapper::LedCountOnHeartAccerlertionRationMapper() {
+
+}
+
+int LedCountOnHeartAccerlertionRationMapper::mapToInt(float accelerationRatio) {
+  return (int)(accelerationRatio * MAX_LEDS);
+}
+
 MovementShowActionMapper::MovementShowActionMapper(LedHeart *heart, IAccelerationRatioMapper *ratioMapper) {
   this->ledHeart = heart;
   this->ratioMapper = ratioMapper;
-}
-
-RandomLedBlinkMovementShow::RandomLedBlinkMovementShow(LedHeart *heart, LedBrightnessAccelerationRatioMapper *ratioMapper, 
-                                                       IArduinoWrapper *wrapper, 
-                                                       float changeLightsThreshold) : MovementShowActionMapper(heart, ratioMapper) {
-    this->arduinoEnv = wrapper;
-    this->changeLightsThreshold = changeLightsThreshold;
-}
-
-void RandomLedBlinkMovementShow::mapToHeart(AccerlationVectorDifference *difference) {
-  ledHeart -> toggleBrightness(difference -> mapAccelerationRatioTo(ratioMapper));
-
-  if (difference -> overThreshold(changeLightsThreshold)) {
-    ledHeart -> turnOnRandomly(4);
-    arduinoEnv -> delayFor(10);
-  }
 }
 
 MovementShow::MovementShow(Gyroscope *gyroscope) {
@@ -57,4 +49,36 @@ void MovementShow::executeIterationWith(MovementShowActionMapper *ledHeartAction
   AccerlationVectorDifference vectorDifference = formerAcceleration.euclideanDistanceTo(currentAcceleration);
   ledHeartActionMapper -> mapToHeart(&vectorDifference);
   formerAcceleration = currentAcceleration;
+}
+
+
+RandomLedBlinkMovementShow::RandomLedBlinkMovementShow(LedHeart *heart, LedBrightnessAccelerationRatioMapper *ratioMapper, 
+                                                       IArduinoWrapper *wrapper, 
+                                                       float changeLightsThreshold) : MovementShowActionMapper(heart, ratioMapper) {
+    this->arduinoEnv = wrapper;
+    this->changeLightsThreshold = changeLightsThreshold;
+}
+
+void RandomLedBlinkMovementShow::mapToHeart(AccerlationVectorDifference *difference) {
+  ledHeart -> toggleBrightness(difference -> mapAccelerationRatioTo(ratioMapper));
+
+  if (difference -> overThreshold(changeLightsThreshold)) {
+    ledHeart -> turnOnRandomly(4);
+    arduinoEnv -> delayFor(10);
+  }
+}
+
+SequentialHeartTurnOnShow::SequentialHeartTurnOnShow(LedHeart *heart, IArduinoWrapper *wrapper) 
+                                                    : MovementShowActionMapper(heart, new LedCountOnHeartAccerlertionRationMapper()) {
+  this->arduinoEnv = wrapper;
+}
+
+void SequentialHeartTurnOnShow::mapToHeart(AccerlationVectorDifference *difference) {
+  int numberOfLedsTurnedOn = difference -> mapAccelerationRatioTo(ratioMapper);
+  ledHeart -> turnOffAll();
+  for (int ledIndex = 0; ledIndex < numberOfLedsTurnedOn; ledIndex++) {
+    ledHeart -> turnOn(ledIndex);
+  }
+
+  arduinoEnv -> delayFor(10);
 }

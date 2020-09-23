@@ -16,6 +16,15 @@ class LedBrightnessAccelerationRatioMapper : public IAccelerationRatioMapper {
     int mapToInt(float accelerationRatio);
 };
 
+class LedCountOnHeartAccerlertionRationMapper : public IAccelerationRatioMapper {
+  private:
+    const int MAX_LEDS = HEART_LED_COUNT;
+
+  public:
+    LedCountOnHeartAccerlertionRationMapper();
+    int mapToInt(float accelerationRatio);
+};
+
 class MovementShowActionMapper {
   protected:
     IAccelerationRatioMapper *ratioMapper;
@@ -46,6 +55,16 @@ class RandomLedBlinkMovementShow : public MovementShowActionMapper {
 
   public:
     RandomLedBlinkMovementShow(LedHeart *heart, LedBrightnessAccelerationRatioMapper *ratioMapper, IArduinoWrapper *wrapper, float changeLightsThreshold);
+    void mapToHeart(AccerlationVectorDifference *difference);
+};
+
+class SequentialHeartTurnOnShow : public MovementShowActionMapper {
+  private:
+    IArduinoWrapper *arduinoEnv;
+    float changeLightsThreshold;
+
+  public:
+    SequentialHeartTurnOnShow(LedHeart *heart, IArduinoWrapper *wrapper);
     void mapToHeart(AccerlationVectorDifference *difference);
 };
 

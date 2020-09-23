@@ -104,8 +104,7 @@ class ArduinoStandardFunctions : public IStandardFunctions {
       return rand();
     }
 
-    int nextRandomIntInBounds(int lower, int upper) 
-    {
+    int nextRandomIntInBounds(int lower, int upper) {
         return lower + rand() % ( upper - lower + 1 );
     }
 };
@@ -181,6 +180,7 @@ Gyroscope *gyroscope = new Gyroscope(new ArduinoWire(MPU_ADDR));
 MovementShow movementShow = MovementShow(gyroscope);
 RandomLedBlinkMovementShow *randomBlinkMovementShow = new RandomLedBlinkMovementShow(ledHeart, new LedBrightnessAccelerationRatioMapper(35, 10),
                                                                                      arduinoEnv, changeLightsThreshold);
+SequentialHeartTurnOnShow *sequentialHeartTurnOnShow = new SequentialHeartTurnOnShow(ledHeart, arduinoEnv);
 
 // Bass filter initialization
 const int MICROPHONE_ANALOG_INPUT_PIN = A1;

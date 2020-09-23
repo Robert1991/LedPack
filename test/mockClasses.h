@@ -184,13 +184,13 @@ class LedHeartMock : public LedHeart
 public:
     MOCK_METHOD(void, initialize, (), ());
 
-    MOCK_METHOD(void, turnOnAll, (), ());
+    MOCK_METHOD(void, turnOnAll, (), (override));
 
-    MOCK_METHOD(void, turnOffAll, (), ());
+    MOCK_METHOD(void, turnOffAll, (), (override));
 
-    MOCK_METHOD(void, turnOn, (int ledIndex), ());
+    MOCK_METHOD(void, turnOn, (int ledIndex), (override));
 
-    MOCK_METHOD(void, turnOff, (int ledIndex), ());
+    MOCK_METHOD(void, turnOff, (int ledIndex), (override));
 
     MOCK_METHOD(void, turnLevelOn, (int level), ());
 
