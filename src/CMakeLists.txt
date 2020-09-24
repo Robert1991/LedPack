@@ -5,6 +5,7 @@ add_library(gyroscope "")
 add_library(movementShow "")
 add_library(lowPassSampler "")
 add_library(lowPassFilter "")
+add_library(lightShow "")
 add_library(arduinoWrapper INTERFACE)
 
 target_sources(
@@ -101,6 +102,20 @@ target_sources(
 
 target_include_directories(
     lowPassFilter
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}
+)
+
+target_sources(
+    lightShow
+    PRIVATE
+        LedPack/lightShow.cpp
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/LedPack/lightShow.h
+    )
+
+target_include_directories(
+    lightShow
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}
 )

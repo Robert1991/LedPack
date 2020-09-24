@@ -10,6 +10,7 @@
 #include "movementShow.h"
 #include "microphone.h"
 #include "lowPassFilter.h"
+#include "lightShow.h"
 
 using namespace std::chrono;
 
@@ -279,9 +280,7 @@ class MicrophoneMock : public Microphone
 {
 public:
     MOCK_METHOD(void, init, (), (override));
-    
     MOCK_METHOD(int, readAnalog, (), (override));
-
     MOCK_METHOD(int, readDigital, (), (override));
 };
 
@@ -292,5 +291,12 @@ class LowPassFilterMock : public ILowPassFilter {
     MOCK_METHOD(int, get, (), (override));
 };
 
+
+// LightShow
+class LightShowExecutionContainerIteratorMock : public LightShowExecutionContainerIterator {
+  public:
+    MOCK_METHOD(void, executeNextStepOn, (LedHeart* heart), (override));
+    MOCK_METHOD(void, reset, (), (override));
+};
 
 #endif

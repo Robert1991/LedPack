@@ -10,7 +10,6 @@
 #include "bassfilterShow.h"
 #include "arduinoWrapper.h"
 
-
 class ArduinoWrapper : public IArduinoWrapper {
   public:
     void beginSerial(int baudRate) {
@@ -194,6 +193,26 @@ const int samplesN = 25;
 BassFilterShow bassFilterShow = BassFilterShow(ledHeart, floatLowPassSampler, samplesN);
 
 
+const int LIGHT_SHOW_EXECUTION_COUNT = 14;
+LightShowExecutionContainer *executions[LIGHT_SHOW_EXECUTION_COUNT] = {
+  new SequentialLedActivationExecution(arduinoEnv, 90, 250, 0, false),
+  new SequentialLedActivationExecution(arduinoEnv, 40, 250, 0, true),
+  new SequentialLedActivationExecution(arduinoEnv, 90, 250, 0, false),
+  new SequentialLedActivationExecution(arduinoEnv, 40, 250, 0, true),
+  new SequentialLedActivationExecution(arduinoEnv, 90, 250, 0, false),
+  new SequentialLedActivationExecution(arduinoEnv, 40, 250, 0, true),
+  new SequentialLedActivationExecution(arduinoEnv, 90, 250, 0, false),
+  new SequentialLedActivationExecution(arduinoEnv, 40, 250, 0, true),
+  new SequentialLedActivationExecution(arduinoEnv, 90, 250, 0, false),
+  new SequentialLedActivationExecution(arduinoEnv, 40, 250, 0, true),
+  new SequentialLedActivationExecution(arduinoEnv, 90, 250, 0, false),
+  new SequentialLedActivationExecution(arduinoEnv, 40, 250, 0, true),
+  new SequentialLedActivationExecution(arduinoEnv, 90, 250, 0, false),
+  new SequentialLedActivationExecution(arduinoEnv, 40, 250, 0, true)
+  };
+LightShowExecutionContainerIterator lightShowContainer = LightShowExecutionContainerIterator(executions, LIGHT_SHOW_EXECUTION_COUNT);
+LightShowSequencer lightShowSequencer = LightShowSequencer(ledHeart, &lightShowContainer);
+
 // Arduino functions
 void setup()
 {
@@ -207,7 +226,8 @@ void setup()
 
 void loop()
 {
-  //bassFilterShow.executeIteration(550);
-  movementShow.executeIterationWith(randomBlinkMovementShow);
+  //bassFilterShow.executeIteration(700);
+  //movementShow.executeIterationWith(randomBlinkMovementShow);
   //lightShow.execute();
+  lightShowSequencer.executeIteration();
 }

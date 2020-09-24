@@ -8,6 +8,7 @@ add_executable(
     MovementShow-test.cpp
     ShiftRegister-test.cpp
     LowPassSampler-test.cpp
+    LightShow-test.cpp
 )
 
 target_link_libraries(
@@ -22,6 +23,7 @@ target_link_libraries(
     movementShow
     lowPassFilter
     lowPassSampler
+    lightShow
 )
 
 add_test(

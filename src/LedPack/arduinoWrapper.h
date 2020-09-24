@@ -67,5 +67,4 @@ class GyroscopeWire {
     
     virtual int readNextRegister() = 0;
 };
-
 #endif
