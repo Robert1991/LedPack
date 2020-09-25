@@ -9,78 +9,67 @@ const int HEART_COLUMN_COUNT = 7;
 const int HEART_MAX_BRIGHTNESS = 255;
 
 class LeftRegisterLevelActivator : public LevelActivator {
-  private:
-   void doForLevel(int level, Led *leds, void (Led::*ledFunctionPointer)());
+ private:
+  void doForLevel(int level, Led *leds, void (Led::*ledFunctionPointer)());
 
-  public:
-    void turnOnLevel(int level, Led *leds);
-    void turnOffLevel(int level, Led *leds);
+ public:
+  void turnOnLevel(int level, Led *leds);
+  void turnOffLevel(int level, Led *leds);
 };
 
 class RightRegisterLevelActivator : public LevelActivator {
-  private:
-    void doForLevel(int level, Led *leds, void (Led::*ledFunctionPointer)());
+ private:
+  void doForLevel(int level, Led *leds, void (Led::*ledFunctionPointer)());
 
-  public:
-    void turnOnLevel(int level, Led *leds);
-    void turnOffLevel(int level, Led *leds);
+ public:
+  void turnOnLevel(int level, Led *leds);
+  void turnOffLevel(int level, Led *leds);
 };
 
 class LeftRegisterColumnActivator : public ColumnActivator {
-  private:
-    void doForColumn(int column, Led *leds, void (Led::*ledFunctionPointer)());
+ private:
+  void doForColumn(int column, Led *leds, void (Led::*ledFunctionPointer)());
 
-  public:
-    void turnOnColumn(int column, Led *leds);
-    void turnOffColumn(int column, Led *leds);
+ public:
+  void turnOnColumn(int column, Led *leds);
+  void turnOffColumn(int column, Led *leds);
 };
 
 class RightRegisterColumnActivator : public ColumnActivator {
-  private:
-    void doForColumn(int column, Led *leds, void (Led::*ledFunctionPointer)());
+ private:
+  void doForColumn(int column, Led *leds, void (Led::*ledFunctionPointer)());
 
-  public:
-    void turnOnColumn(int column, Led *leds);
-    void turnOffColumn(int column, Led *leds);
+ public:
+  void turnOnColumn(int column, Led *leds);
+  void turnOffColumn(int column, Led *leds);
 };
 
 class LedHeart {
-  private:
-    LedShiftRegister *leftShiftRegister;
-    LedShiftRegister *rightShiftRegister;
-    IStandardFunctions *stdFunctions;
-    
-    bool alreadyTurnedOn(int *turnedOn, int arrayLength, int ledIndex);
-    void doForColumn(int column, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int));
-    void doForLevel(int level, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int));
-    void doForLed(int ledIndex, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int));
+ private:
+  LedShiftRegister *leftShiftRegister;
+  LedShiftRegister *rightShiftRegister;
+  IStandardFunctions *stdFunctions;
 
-  public:
-    LedHeart();
+  bool alreadyTurnedOn(int *turnedOn, int arrayLength, int ledIndex);
+  void doForColumn(int column, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int));
+  void doForLevel(int level, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int));
+  void doForLed(int ledIndex, void (LedShiftRegister::*shiftRegisterFunctionPointer)(int));
 
-    LedHeart(IStandardFunctions *stdFunctions, LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister);
+ public:
+  LedHeart();
+  LedHeart(IStandardFunctions *stdFunctions, LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister);
 
-    void initialize();
-
-    virtual void turnOnAll();
-
-    virtual void turnOffAll();
-
-    virtual void turnOn(int ledIndex);
-
-    virtual void turnOff(int ledIndex);
-
-    void turnLevelOn(int level);
-
-    void turnLevelOff(int level);
-
-    void turnColumnOn(int column);
-
-    void turnColumnOff(int column);
-
-    virtual void toggleBrightness(int brightness);
-
-    virtual void turnOnRandomly(int minLedsTurnedOn = 0);
+  void initialize();
+  virtual void turnOnAll();
+  virtual void turnOffAll();
+  virtual void turnOn(int ledIndex);
+  virtual void turnOff(int ledIndex);
+  void turnLevelOn(int level);
+  void turnLevelOff(int level);
+  void turnColumnOn(int column);
+  void turnColumnOff(int column);
+  virtual void toggleBrightness(int brightness);
+  virtual void turnOnRandomly(int minLedsTurnedOn = 0);
 };
 
 #endif

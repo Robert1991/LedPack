@@ -3,23 +3,19 @@
 
 #include "arduinoWrapper.h"
 
-class Microphone
-{
-  private:
-    IArduinoWrapper *arduinoEnv;
-    int microphonePin;
-    int digitalInputPin;
-    
-  public:
-    Microphone();
+class Microphone {
+ private:
+  IArduinoWrapper *arduinoEnv;
+  int microphonePin;
+  int digitalInputPin;
 
-    Microphone(IArduinoWrapper *arduinoEnv, int microphonePin, int digitalInputPin);
+ public:
+  Microphone();
+  Microphone(IArduinoWrapper *arduinoEnv, int microphonePin, int digitalInputPin);
 
-    virtual void init();
-    
-    virtual int readAnalog();
-
-    virtual int readDigital();
+  virtual void init();
+  virtual int readAnalog();
+  virtual int readDigital();
 };
 
 #endif
