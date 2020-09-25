@@ -76,6 +76,19 @@ class LightShowSequencer {
     void executeIteration();
 };
 
+class LightShowExecutionContainerRepeater : public LightShowExecutionContainer {
+  private:
+    int repetitions = 0;
+    LightShowExecutionContainer* executionContainer;
+  
+  protected:
+    void executeNextStepOn(LedHeart* heart);
+    void resetExtended();
+
+  public:
+    LightShowExecutionContainerRepeater(IArduinoWrapper *arduinoEnv, LightShowExecutionContainer* executionContainer, int repetitions);
+};
+
 class SequentialLedActivationExecution : public LightShowExecutionContainer {
   private:
     static const int TOTAL_EXECUTIONS = 15;
@@ -83,14 +96,33 @@ class SequentialLedActivationExecution : public LightShowExecutionContainer {
     int currentStep = 0;
     int currentLedIndex = 0;
     bool turnOffPrevious = false;
+    bool spinLeft = false;
+
+    void turnOffPreviousLedForCurrentIndex(LedHeart *heart);
+    void incrementIndex();
 
   protected:
     void executeNextStepOn(LedHeart* heart);
+    void resetExtended();
 
   public:
     SequentialLedActivationExecution(IArduinoWrapper *arduinoEnv, int delay, int brightness, int startIndex);
-    SequentialLedActivationExecution(IArduinoWrapper *arduinoEnv, int delay, int brightness, int startIndex, bool turnOffPrevious);
+    SequentialLedActivationExecution(IArduinoWrapper *arduinoEnv, int delay, int brightness, int startIndex, bool turnOffPrevious, bool spinLeft);
+};
+
+class RandomHeartBlinkExecution : public LightShowExecutionContainer {
+  private:
+    // this sets as default, that the heart is turned off by default in the first iteration
+    bool isOn = true;
+    int minLedsTurnedOn = 1;
+
+  protected:
     void resetExtended();
+    void executeNextStepOn(LedHeart* heart);
+
+  public:
+    RandomHeartBlinkExecution(IArduinoWrapper *arduinoEnv, int delay, int brightness, int times, int minLedsTurnedOn);
+
 };
 
 #endif

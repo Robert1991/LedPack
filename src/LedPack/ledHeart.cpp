@@ -147,9 +147,9 @@ void LedHeart::turnOnRandomly(int minLedsTurnedOn) {
     int turnedOnLeds[numberOfLedsTurnedOn];
 
     for (int i = 0; i < numberOfLedsTurnedOn; i++) {
-      int nextLed = stdFunctions -> nextRandomIntInBounds(0, 14);
+      int nextLed = stdFunctions -> nextRandomIntInBounds(0, HEART_LED_COUNT);
       while (alreadyTurnedOn(turnedOnLeds, numberOfLedsTurnedOn, nextLed)) {
-        nextLed = stdFunctions -> nextRandomIntInBounds(0, 14);
+        nextLed = stdFunctions -> nextRandomIntInBounds(0, HEART_LED_COUNT);
       }
       turnedOnLeds[i] = nextLed;
     }
