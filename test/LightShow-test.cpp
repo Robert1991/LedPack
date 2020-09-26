@@ -21,11 +21,11 @@ class TestLightShowExecutionContainer : public LightShowExecutionContainer {
       : LightShowExecutionContainer(testArduinoEnv, EXECUTION_COUNT, delay, 0) {}
 
   void executeNextStepOn(LedHeart* heart) {
-    if (currentExecution == 0) {
+    if (currentExecution == 1) {
       brightnessFactor = 10;
-    } else if (currentExecution == 1) {
-      brightnessFactor = 20;
     } else if (currentExecution == 2) {
+      brightnessFactor = 20;
+    } else if (currentExecution == 3) {
       brightnessFactor = 30;
     }
   }
@@ -258,6 +258,25 @@ TEST_F(
   executeLightShowExecutionContainer(&sequentialExecution, 5);
 }
 
+TEST_F(LightShowTest, testThatTheGlobalHeartBlinkExecutionFirstTurnsOffAllLedsAndThenTurnsOnAllLedsTheGivenNumberOfTimes) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(6));
+  EXPECT_CALL(arduinoEnvMock, delayFor(Eq(EXPECTED_DELAY_INTERVAL))).Times(Exactly(6));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+  }
+
+  auto globalHeartBlink = GlobalHeartBlinkExecution(&arduinoEnvMock, EXPECTED_DELAY_INTERVAL, EXPECTED_BRIGHTNESS_FACTOR, 3);
+  executeLightShowExecutionContainer(&globalHeartBlink, 6);
+}
+
 TEST_F(
     LightShowTest,
     testThatTheRandomHeartBlinkExecutionFirstTurnsOffAllLedsAndThenTurnsThenOnRandomlyWithTheGivenMinimumCount_CheckThatAfterThatTheLedsAreTurnedOfAgain) {
@@ -296,4 +315,167 @@ TEST_F(LightShowTest, testThatTheRandomHeartBlinkExecutionAlwaysTurnsOffTheHeart
   // the next step would be on again
   randomLedBlink.reset();
   randomLedBlink.executeOn(&ledHeartMock);
+}
+
+TEST_F(LightShowTest, testThatTheLightShowExecutionContainerRepeaterRepeatesTheGivenExecutionTheGivenNumberOfTimes) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(4));
+  EXPECT_CALL(arduinoEnvMock, delayFor(Eq(EXPECTED_DELAY_INTERVAL))).Times(Exactly(4));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+  }
+
+  auto randomLedBlink = RandomHeartBlinkExecution(&arduinoEnvMock, EXPECTED_DELAY_INTERVAL, EXPECTED_BRIGHTNESS_FACTOR, 1, 5);
+  auto repeater = LightShowExecutionContainerRepeater(&arduinoEnvMock, &randomLedBlink, 2);
+  executeLightShowExecutionContainer(&repeater, 4);
+  ASSERT_FALSE(repeater.hasAnotherExecution());
+}
+
+TEST_F(LightShowTest, testThatTheLightShowExecutionContainerRepeaterRepeatesTheGivenExecutionTheGivenNumberOfTimes_TestWithDelayDecreaseFactor) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(4));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+  }
+
+  auto randomLedBlink = RandomHeartBlinkExecution(&arduinoEnvMock, 200, EXPECTED_BRIGHTNESS_FACTOR, 1, 5);
+  auto repeater = LightShowExecutionContainerRepeater(&arduinoEnvMock, &randomLedBlink, 2, 0.5);
+  executeLightShowExecutionContainer(&repeater, 4);
+  ASSERT_FALSE(repeater.hasAnotherExecution());
+}
+
+TEST_F(
+    LightShowTest,
+    testThatTheLightShowExecutionContainerRepeaterRepeatesTheGivenExecutionTheGivenNumberOfTimes_TestWithDelayDecreaseFactor_WhenResettingTheContainer) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(6));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+  }
+
+  auto randomLedBlink = RandomHeartBlinkExecution(&arduinoEnvMock, 200, EXPECTED_BRIGHTNESS_FACTOR, 1, 5);
+  auto repeater = LightShowExecutionContainerRepeater(&arduinoEnvMock, &randomLedBlink, 2, 0.5);
+  executeLightShowExecutionContainer(&repeater, 3);
+  repeater.reset();
+  executeLightShowExecutionContainer(&repeater, 3);
+}
+
+TEST_F(LightShowTest, testThatTheSequentialRowActivatorActivatesAllRowsFromAGivenStartIndex) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(6));
+  EXPECT_CALL(arduinoEnvMock, delayFor(Eq(EXPECTED_DELAY_INTERVAL))).Times(Exactly(6));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(2)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(3)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(4)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(5)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(6)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(1)));
+  }
+
+  auto sequentialRowActivation =
+      (SequentialRowActivator::createUpwardsMovingRowActivator(&arduinoEnvMock, EXPECTED_DELAY_INTERVAL, EXPECTED_BRIGHTNESS_FACTOR))
+          ->withStartIndex(2)
+          ->turnOffPrevious(true);
+  executeLightShowExecutionContainer(sequentialRowActivation, 6);
+}
+
+TEST_F(LightShowTest, testThatTheSequentialRowActivatorTurnsOnTheRowsOnTheHeartSequentiallyAndDoesNotTurnThemOffWhenGivenTheSetting) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(6));
+  EXPECT_CALL(arduinoEnvMock, delayFor(Eq(EXPECTED_DELAY_INTERVAL))).Times(Exactly(6));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(2)));
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(3)));
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(4)));
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(5)));
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(6)));
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(1)));
+  }
+
+  auto sequentialRowActivation =
+      (SequentialRowActivator::createUpwardsMovingRowActivator(&arduinoEnvMock, EXPECTED_DELAY_INTERVAL, EXPECTED_BRIGHTNESS_FACTOR))
+          ->withStartIndex(2)
+          ->turnOffPrevious(false);
+  executeLightShowExecutionContainer(sequentialRowActivation, 6);
+}
+
+TEST_F(LightShowTest, testThatTheSequentialRowActivatorActivatesAllRowsFromAGivenStartIndex_DowndwardsDirection) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(6));
+  EXPECT_CALL(arduinoEnvMock, delayFor(Eq(EXPECTED_DELAY_INTERVAL))).Times(Exactly(6));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(2)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(1)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(6)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(5)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(4)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnLevelOn(Eq(3)));
+  }
+
+  auto sequentialRowActivation =
+      (SequentialRowActivator::createDownwardsMovingRowActivator(&arduinoEnvMock, EXPECTED_DELAY_INTERVAL, EXPECTED_BRIGHTNESS_FACTOR))
+          ->withStartIndex(2)
+          ->turnOffPrevious(true);
+  executeLightShowExecutionContainer(sequentialRowActivation, 6);
 }

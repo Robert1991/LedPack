@@ -203,7 +203,7 @@ LightShowExecutionContainer::LightShowExecutionContainer(IArduinoWrapper* arduin
 }
 
 void LightShowExecutionContainer::executeOn(LedHeart* heart) {
-  if (currentExecution < totalExecutions) {
+  if (currentExecution <= totalExecutions) {
     this->executeNextStepOn(heart);
     heart->toggleBrightness(brightnessFactor);
     this->delay();
@@ -211,16 +211,18 @@ void LightShowExecutionContainer::executeOn(LedHeart* heart) {
   }
 }
 
-void LightShowExecutionContainer::delay() { this->arduinoEnv->delayFor(delayTime); }
+void LightShowExecutionContainer::delay() { arduinoEnv->delayFor(delayTime); }
 
-bool LightShowExecutionContainer::hasAnotherExecution() { return currentExecution < totalExecutions; }
+bool LightShowExecutionContainer::hasAnotherExecution() { return currentExecution <= totalExecutions; }
 
 void LightShowExecutionContainer::reset() {
-  currentExecution = 0;
+  currentExecution = 1;
   resetExtended();
 }
 
 void LightShowExecutionContainer::resetExtended() {}
+
+int LightShowExecutionContainer::getTotalExecutions() { return totalExecutions; };
 
 // LightShowExecutionContainerIterator
 
@@ -284,8 +286,8 @@ SequentialLedActivationExecution::SequentialLedActivationExecution(IArduinoWrapp
 }
 
 void SequentialLedActivationExecution::executeNextStepOn(LedHeart* heart) {
-  if (currentExecution < totalExecutions) {
-    if (currentExecution == 0) {
+  if (currentExecution <= totalExecutions) {
+    if (currentExecution == 1) {
       heart->turnOffAll();
     } else {
       heart->turnOn(currentLedIndex);
@@ -331,30 +333,129 @@ void SequentialLedActivationExecution::incrementIndex() {
 
 void SequentialLedActivationExecution::resetExtended() { currentLedIndex = startIndex; }
 
-RandomHeartBlinkExecution::RandomHeartBlinkExecution(IArduinoWrapper* arduinoEnv, int delay, int brightness, int times, int minLedsTurnedOn)
+OffOnSwitchExecution::OffOnSwitchExecution(IArduinoWrapper* arduinoEnv, int delay, int brightness, int times)
     : LightShowExecutionContainer(arduinoEnv, 0, delay, brightness) {
   this->totalExecutions = 2 * times;
-  this->minLedsTurnedOn = minLedsTurnedOn;
 }
 
-void RandomHeartBlinkExecution::executeNextStepOn(LedHeart* heart) {
+void OffOnSwitchExecution::executeNextStepOn(LedHeart* heart) {
   if (isOn) {
     heart->turnOffAll();
     isOn = false;
   } else {
-    heart->turnOnRandomly(minLedsTurnedOn);
+    applyOnActionTo(heart);
     isOn = true;
   }
 }
 
-void RandomHeartBlinkExecution::resetExtended() { isOn = true; }
+void OffOnSwitchExecution::resetExtended() { isOn = true; }
+
+GlobalHeartBlinkExecution::GlobalHeartBlinkExecution(IArduinoWrapper* arduinoEnv, int delay, int brightness, int times)
+    : OffOnSwitchExecution(arduinoEnv, delay, brightness, times) {}
+
+void GlobalHeartBlinkExecution::applyOnActionTo(LedHeart* heart) { heart->turnOnAll(); }
+
+RandomHeartBlinkExecution::RandomHeartBlinkExecution(IArduinoWrapper* arduinoEnv, int delay, int brightness, int times, int minLedsTurnedOn)
+    : OffOnSwitchExecution(arduinoEnv, delay, brightness, times) {
+  this->minLedsTurnedOn = minLedsTurnedOn;
+}
+
+void RandomHeartBlinkExecution::applyOnActionTo(LedHeart* heart) { heart->turnOnRandomly(minLedsTurnedOn); }
 
 LightShowExecutionContainerRepeater::LightShowExecutionContainerRepeater(IArduinoWrapper* arduinoEnv, LightShowExecutionContainer* executionContainer,
                                                                          int repetitions)
-    : LightShowExecutionContainer(arduinoEnv, repetitions) {
+    : LightShowExecutionContainer(arduinoEnv, 0) {
+  this->totalExecutions = repetitions * executionContainer->getTotalExecutions();
   this->executionContainer = executionContainer;
+  this->originalContainerDelay = executionContainer->delayTime;
+  currentDelay = originalContainerDelay;
 }
 
-void LightShowExecutionContainerRepeater::executeNextStepOn(LedHeart* heart) {}
+LightShowExecutionContainerRepeater::LightShowExecutionContainerRepeater(IArduinoWrapper* arduinoEnv, LightShowExecutionContainer* executionContainer,
+                                                                         int repetitions, float delayFactor)
+    : LightShowExecutionContainer(arduinoEnv, 0) {
+  this->totalExecutions = repetitions * executionContainer->getTotalExecutions();
+  this->executionContainer = executionContainer;
+  this->delayFactor = delayFactor;
+  this->originalContainerDelay = executionContainer->delayTime;
+  currentDelay = originalContainerDelay;
+}
 
-void LightShowExecutionContainerRepeater::resetExtended() {}
+void LightShowExecutionContainerRepeater::executeOn(LedHeart* heart) {
+  if (currentExecution <= totalExecutions) {
+    executeNextStepOn(heart);
+    currentExecution++;
+  }
+}
+
+void LightShowExecutionContainerRepeater::executeNextStepOn(LedHeart* heart) {
+  if (!executionContainer->hasAnotherExecution()) {
+    executionContainer->reset();
+    executionContainer->delayTime = nextDelayTime();
+  }
+  executionContainer->executeOn(heart);
+}
+
+void LightShowExecutionContainerRepeater::resetExtended() {
+  currentDelay = originalContainerDelay;
+  executionContainer->delayTime = originalContainerDelay;
+  executionContainer->reset();
+}
+
+int LightShowExecutionContainerRepeater::nextDelayTime() {
+  currentDelay = static_cast<int>(currentDelay * delayFactor);
+  return currentDelay;
+}
+
+SequentialRowActivator* SequentialRowActivator::createUpwardsMovingRowActivator(IArduinoWrapper* arduinoEnv, int delay, int brightness) {
+  return (SequentialRowActivator*)(new UpwardsMovingSequentialRowActivator(arduinoEnv, delay, brightness));
+}
+
+SequentialRowActivator* SequentialRowActivator::createDownwardsMovingRowActivator(IArduinoWrapper* arduinoEnv, int delay, int brightness) {
+  return (SequentialRowActivator*)(new DownwardsMovingSequentialRowActivator(arduinoEnv, delay, brightness));
+}
+
+SequentialRowActivator::SequentialRowActivator(IArduinoWrapper* arduinoEnv, int delay, int brightness)
+    : LightShowExecutionContainer(arduinoEnv, HEART_LEVEL_COUNT, delay, brightness){};
+
+void SequentialRowActivator::executeNextStepOn(LedHeart* heart) {
+  if (turnOffPreviousLed || currentExecution == 1) {
+    heart->turnOffAll();
+  }
+  heart->turnLevelOn(currentLevelIndex);
+  incrementIndex();
+}
+
+void SequentialRowActivator::resetExtended() { this->currentLevelIndex = startIndex; };
+
+SequentialRowActivator* SequentialRowActivator::withStartIndex(int startIndex) {
+  this->startIndex = startIndex;
+  this->currentLevelIndex = startIndex;
+  return this;
+}
+
+SequentialRowActivator* SequentialRowActivator::turnOffPrevious(bool turnOff) {
+  this->turnOffPreviousLed = turnOff;
+  return this;
+}
+
+UpwardsMovingSequentialRowActivator::UpwardsMovingSequentialRowActivator(IArduinoWrapper* arduinoEnv, int delay, int brightness)
+    : SequentialRowActivator(arduinoEnv, delay, brightness){};
+
+void UpwardsMovingSequentialRowActivator::incrementIndex() {
+  if (currentLevelIndex == HEART_LEVEL_COUNT) {
+    currentLevelIndex = 1;
+  } else {
+    currentLevelIndex++;
+  }
+}
+DownwardsMovingSequentialRowActivator::DownwardsMovingSequentialRowActivator(IArduinoWrapper* arduinoEnv, int delay, int brightness)
+    : SequentialRowActivator(arduinoEnv, delay, brightness){};
+
+void DownwardsMovingSequentialRowActivator::incrementIndex() {
+  if (currentLevelIndex == 1) {
+    currentLevelIndex = HEART_LEVEL_COUNT;
+  } else {
+    currentLevelIndex--;
+  }
+}

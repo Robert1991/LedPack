@@ -64,10 +64,10 @@ class LedHeart {
   virtual void turnOffAll();
   virtual void turnOn(int ledIndex);
   virtual void turnOff(int ledIndex);
-  void turnLevelOn(int level);
-  void turnLevelOff(int level);
-  void turnColumnOn(int column);
-  void turnColumnOff(int column);
+  virtual void turnLevelOn(int level);
+  virtual void turnLevelOff(int level);
+  virtual void turnColumnOn(int column);
+  virtual void turnColumnOff(int column);
   virtual void toggleBrightness(int brightness);
   virtual void turnOnRandomly(int minLedsTurnedOn = 0);
 };
