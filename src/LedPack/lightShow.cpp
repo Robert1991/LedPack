@@ -200,6 +200,7 @@ LightShowExecutionContainer::LightShowExecutionContainer(IArduinoWrapper* arduin
   this->totalExecutions = totalExecutions;
   this->delayTime = delay;
   this->brightnessFactor = brightnessFactor;
+  this->originalDelayTime = delay;
 }
 
 void LightShowExecutionContainer::executeOn(LedHeart* heart) {
@@ -222,7 +223,59 @@ void LightShowExecutionContainer::reset() {
 
 void LightShowExecutionContainer::resetExtended() {}
 
+void LightShowExecutionContainer::resetDelayTime() { this->delayTime = originalDelayTime; }
+
+int LightShowExecutionContainer::applyDelayFactor(float delayFactor) {
+  delayTime = static_cast<int>(delayTime * delayFactor);
+  return delayTime;
+}
+
 int LightShowExecutionContainer::getTotalExecutions() { return totalExecutions; };
+
+LightShowExecutionContainerRepeater::LightShowExecutionContainerRepeater(IArduinoWrapper* arduinoEnv, LightShowExecutionContainer* executionContainer,
+                                                                         int repetitions)
+    : LightShowExecutionContainer(arduinoEnv, 0) {
+  this->totalExecutions = repetitions * executionContainer->getTotalExecutions();
+  this->executionContainer = executionContainer;
+  this->originalContainerDelay = executionContainer->delayTime;
+}
+
+LightShowExecutionContainerRepeater::LightShowExecutionContainerRepeater(IArduinoWrapper* arduinoEnv, LightShowExecutionContainer* executionContainer,
+                                                                         int repetitions, float delayFactor)
+    : LightShowExecutionContainer(arduinoEnv, 0) {
+  this->totalExecutions = repetitions * executionContainer->getTotalExecutions();
+  this->executionContainer = executionContainer;
+  this->delayFactor = delayFactor;
+  this->originalDelayFactor = delayFactor;
+  this->originalContainerDelay = executionContainer->delayTime;
+}
+
+int LightShowExecutionContainerRepeater::applyDelayFactor(float newDelayFactor) {
+  this->delayFactor = this->delayFactor * newDelayFactor;
+  return this->delayTime;
+}
+
+void LightShowExecutionContainerRepeater::executeOn(LedHeart* heart) {
+  if (currentExecution <= totalExecutions) {
+    executeNextStepOn(heart);
+    currentExecution++;
+  }
+}
+
+void LightShowExecutionContainerRepeater::executeNextStepOn(LedHeart* heart) {
+  if (!executionContainer->hasAnotherExecution()) {
+    executionContainer->reset();
+    executionContainer->applyDelayFactor(delayFactor);
+  }
+  executionContainer->executeOn(heart);
+}
+
+void LightShowExecutionContainerRepeater::resetExtended() {
+  executionContainer->resetDelayTime();
+  executionContainer->reset();
+}
+
+void LightShowExecutionContainerRepeater::resetDelayTime() { delayFactor = originalDelayFactor; }
 
 // LightShowExecutionContainerIterator
 
@@ -362,49 +415,70 @@ RandomHeartBlinkExecution::RandomHeartBlinkExecution(IArduinoWrapper* arduinoEnv
 
 void RandomHeartBlinkExecution::applyOnActionTo(LedHeart* heart) { heart->turnOnRandomly(minLedsTurnedOn); }
 
-LightShowExecutionContainerRepeater::LightShowExecutionContainerRepeater(IArduinoWrapper* arduinoEnv, LightShowExecutionContainer* executionContainer,
-                                                                         int repetitions)
-    : LightShowExecutionContainer(arduinoEnv, 0) {
-  this->totalExecutions = repetitions * executionContainer->getTotalExecutions();
-  this->executionContainer = executionContainer;
-  this->originalContainerDelay = executionContainer->delayTime;
-  currentDelay = originalContainerDelay;
-}
+LightShowExecutionContainerSequence::LightShowExecutionContainerSequence(int sequenceLength) : LightShowExecutionContainer(nullptr, 0) {
+  containerSequence = new LightShowExecutionContainer*[sequenceLength];
+  this->sequenceLength = sequenceLength;
+};
 
-LightShowExecutionContainerRepeater::LightShowExecutionContainerRepeater(IArduinoWrapper* arduinoEnv, LightShowExecutionContainer* executionContainer,
-                                                                         int repetitions, float delayFactor)
-    : LightShowExecutionContainer(arduinoEnv, 0) {
-  this->totalExecutions = repetitions * executionContainer->getTotalExecutions();
-  this->executionContainer = executionContainer;
+LightShowExecutionContainerSequence::LightShowExecutionContainerSequence(int sequenceLength, int times) : LightShowExecutionContainer(nullptr, 0) {
+  containerSequence = new LightShowExecutionContainer*[sequenceLength];
+  this->sequenceLength = sequenceLength;
+  this->times = times;
+};
+
+LightShowExecutionContainerSequence::LightShowExecutionContainerSequence(int sequenceLength, int times, float delayFactor)
+    : LightShowExecutionContainer(nullptr, 0) {
+  containerSequence = new LightShowExecutionContainer*[sequenceLength];
+  this->sequenceLength = sequenceLength;
+  this->times = times;
   this->delayFactor = delayFactor;
-  this->originalContainerDelay = executionContainer->delayTime;
-  currentDelay = originalContainerDelay;
+  this->originalDelayFactor = delayFactor;
 }
 
-void LightShowExecutionContainerRepeater::executeOn(LedHeart* heart) {
+void LightShowExecutionContainerSequence::executeOn(LedHeart* heart) {
   if (currentExecution <= totalExecutions) {
     executeNextStepOn(heart);
     currentExecution++;
   }
 }
+void LightShowExecutionContainerSequence::executeNextStepOn(LedHeart* heart) {
+  if (!containerSequence[currentContainerIndex]->hasAnotherExecution()) {
+    containerSequence[currentContainerIndex]->reset();
+    containerSequence[currentContainerIndex]->applyDelayFactor(delayFactor);
 
-void LightShowExecutionContainerRepeater::executeNextStepOn(LedHeart* heart) {
-  if (!executionContainer->hasAnotherExecution()) {
-    executionContainer->reset();
-    executionContainer->delayTime = nextDelayTime();
+    currentContainerIndex++;
+    if (currentContainerIndex == sequenceLength) {
+      currentContainerIndex = 0;
+    }
   }
-  executionContainer->executeOn(heart);
+  containerSequence[currentContainerIndex]->executeOn(heart);
+};
+
+void LightShowExecutionContainerSequence::resetExtended() {
+  containerSequence[currentContainerIndex]->reset();
+  currentContainerIndex = 0;
+
+  for (int containerIndex = 0; containerIndex < lastContainerAddedIndex; containerIndex++) {
+    containerSequence[containerIndex]->resetDelayTime();
+  }
+};
+
+int LightShowExecutionContainerSequence::applyDelayFactor(float delayFactor) {
+  this->delayFactor = this->delayFactor * delayFactor;
+  return delayTime;
+}
+void LightShowExecutionContainerSequence::resetDelayTime() { this->delayFactor = originalDelayFactor; }
+
+LightShowExecutionContainerSequence* LightShowExecutionContainerSequence::addContainer(LightShowExecutionContainer* container) {
+  this->totalExecutions += times * container->getTotalExecutions();
+  this->containerSequence[lastContainerAddedIndex] = container;
+  lastContainerAddedIndex++;
+  return this;
 }
 
-void LightShowExecutionContainerRepeater::resetExtended() {
-  currentDelay = originalContainerDelay;
-  executionContainer->delayTime = originalContainerDelay;
-  executionContainer->reset();
-}
-
-int LightShowExecutionContainerRepeater::nextDelayTime() {
-  currentDelay = static_cast<int>(currentDelay * delayFactor);
-  return currentDelay;
+LightShowExecutionContainerSequence* LightShowExecutionContainerSequence::executeTimes(int times) {
+  this->times = times;
+  return this;
 }
 
 SequentialRowActivator* SequentialRowActivator::createUpwardsMovingRowActivator(IArduinoWrapper* arduinoEnv, int delay, int brightness) {

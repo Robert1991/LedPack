@@ -479,3 +479,374 @@ TEST_F(LightShowTest, testThatTheSequentialRowActivatorActivatesAllRowsFromAGive
           ->turnOffPrevious(true);
   executeLightShowExecutionContainer(sequentialRowActivation, 6);
 }
+
+TEST_F(LightShowTest, testExecutingALightShowExecutionContainerSequenceAndCheckThatTheContainersAreIterated) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(8));
+  EXPECT_CALL(arduinoEnvMock, delayFor(Eq(EXPECTED_DELAY_INTERVAL))).Times(Exactly(8));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    // Random Heart blink execution
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+
+    // Global Heart Blink execution
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+  }
+
+  auto containerSequence =
+      (new LightShowExecutionContainerSequence(2))
+          ->addContainer(new RandomHeartBlinkExecution(&arduinoEnvMock, EXPECTED_DELAY_INTERVAL, EXPECTED_BRIGHTNESS_FACTOR, 1, 5))
+          ->addContainer(new GlobalHeartBlinkExecution(&arduinoEnvMock, EXPECTED_DELAY_INTERVAL, EXPECTED_BRIGHTNESS_FACTOR, 3));
+
+  executeLightShowExecutionContainer(containerSequence, 8);
+  ASSERT_FALSE(containerSequence->hasAnotherExecution());
+}
+
+TEST_F(LightShowTest, testResettingTheLightShowExecutionContainerSequenceWhenExecutingIt2Times) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(12));
+  EXPECT_CALL(arduinoEnvMock, delayFor(Eq(EXPECTED_DELAY_INTERVAL))).Times(Exactly(12));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    // 1
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+
+    // 2
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+
+    // Reset
+
+    // 1
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+
+    // 2
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+  }
+
+  auto containerSequence =
+      (new LightShowExecutionContainerSequence(2, 2))
+          ->addContainer(new RandomHeartBlinkExecution(&arduinoEnvMock, EXPECTED_DELAY_INTERVAL, EXPECTED_BRIGHTNESS_FACTOR, 1, 5))
+          ->addContainer(new GlobalHeartBlinkExecution(&arduinoEnvMock, EXPECTED_DELAY_INTERVAL, EXPECTED_BRIGHTNESS_FACTOR, 1));
+
+  executeLightShowExecutionContainer(containerSequence, 6);
+  containerSequence->reset();
+  executeLightShowExecutionContainer(containerSequence, 6);
+}
+
+TEST_F(LightShowTest, testLightShowExecutionContainerSequenceWithDelayFactorAndNormalLightShowExecution) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(8));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(50)));
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(50)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+  }
+
+  auto containerSequence = (new LightShowExecutionContainerSequence(2, 2, 0.5))
+                               ->addContainer(new GlobalHeartBlinkExecution(&arduinoEnvMock, 100, EXPECTED_BRIGHTNESS_FACTOR, 1))
+                               ->addContainer(new GlobalHeartBlinkExecution(&arduinoEnvMock, 200, EXPECTED_BRIGHTNESS_FACTOR, 1));
+
+  executeLightShowExecutionContainer(containerSequence, 8);
+}
+
+TEST_F(LightShowTest, testLightShowExecutionContainerSequenceWithDelayFactorAndNormalLightShowExecutionWhenResettingTheContainer) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(8));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+  }
+
+  auto containerSequence = (new LightShowExecutionContainerSequence(2, 2, 0.5))
+                               ->addContainer(new GlobalHeartBlinkExecution(&arduinoEnvMock, 200, EXPECTED_BRIGHTNESS_FACTOR, 1))
+                               ->addContainer(new GlobalHeartBlinkExecution(&arduinoEnvMock, 100, EXPECTED_BRIGHTNESS_FACTOR, 1));
+
+  executeLightShowExecutionContainer(containerSequence, 6);
+  containerSequence->reset();
+  executeLightShowExecutionContainer(containerSequence, 2);
+}
+
+TEST_F(LightShowTest, testLightShowExecutionContainerSequenceWithDelayFactorAndLightShowExecutionContainerRepeaterAlsoHavingDelayFactor) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(8));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(50)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(50)));
+  }
+
+  auto randomLedBlink = RandomHeartBlinkExecution(&arduinoEnvMock, 200, EXPECTED_BRIGHTNESS_FACTOR, 1, 5);
+  auto repeater = LightShowExecutionContainerRepeater(&arduinoEnvMock, &randomLedBlink, 2, 0.5);
+
+  auto containerSequence = (new LightShowExecutionContainerSequence(1, 2, 0.5))->addContainer(&repeater);
+
+  executeLightShowExecutionContainer(containerSequence, 8);
+}
+
+TEST_F(LightShowTest,
+       testLightShowExecutionContainerSequenceWithDelayFactorAndLightShowExecutionContainerRepeaterAlsoHavingDelayFactor_WhenResettingTheSequence) {
+  EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(EXPECTED_BRIGHTNESS_FACTOR))).Times(Exactly(16));
+
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    // 1
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(50)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(50)));
+
+    // 2
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, turnOffAll());
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(50)));
+    EXPECT_CALL(ledHeartMock, turnOnRandomly(Eq(5)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(50)));
+  }
+
+  auto randomLedBlink = RandomHeartBlinkExecution(&arduinoEnvMock, 200, EXPECTED_BRIGHTNESS_FACTOR, 1, 5);
+  auto repeater = LightShowExecutionContainerRepeater(&arduinoEnvMock, &randomLedBlink, 2, 0.5);
+
+  auto containerSequence = (new LightShowExecutionContainerSequence(1, 2, 0.5))->addContainer(&repeater);
+
+  executeLightShowExecutionContainer(containerSequence, 8);
+  containerSequence->reset();
+  executeLightShowExecutionContainer(containerSequence, 8);
+}
+
+TEST_F(LightShowTest, testLightShowExecutionContainerSequenceWithDelayFactorAndANestedLightShowExecutionContainerSequence) {
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    // 2
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+  }
+
+  auto randomLedBlink = TestLightShowExecutionContainer(&arduinoEnvMock, 400);
+  auto nestedSequence = (new LightShowExecutionContainerSequence(1, 2, 0.5))->addContainer(&randomLedBlink);
+  auto containerSequence = (new LightShowExecutionContainerSequence(1, 2, 0.5))->addContainer(nestedSequence);
+  executeLightShowExecutionContainer(containerSequence, 12);
+}
+
+TEST_F(LightShowTest, testLightShowExecutionContainerSequenceWithDelayFactorAndANestedLightShowExecutionContainerSequenceWhenResettingTheSequence) {
+  using ::testing::InSequence;
+  {
+    InSequence seq;
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    // 2
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+    // reset
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(200)));
+
+    // 2
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(400)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(10)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(20)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+
+    EXPECT_CALL(ledHeartMock, toggleBrightness(Eq(30)));
+    EXPECT_CALL(arduinoEnvMock, delayFor(Eq(100)));
+  }
+
+  auto randomLedBlink = TestLightShowExecutionContainer(&arduinoEnvMock, 400);
+  auto nestedSequence = (new LightShowExecutionContainerSequence(1, 2, 0.5))->addContainer(&randomLedBlink);
+  auto containerSequence = (new LightShowExecutionContainerSequence(1, 2, 0.5))->addContainer(nestedSequence);
+  executeLightShowExecutionContainer(containerSequence, 12);
+  containerSequence->reset();
+  executeLightShowExecutionContainer(containerSequence, 12);
+}

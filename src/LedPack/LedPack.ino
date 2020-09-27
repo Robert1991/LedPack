@@ -84,15 +84,19 @@ LedHeart *ledHeart = new LedHeart(arduinoStdFunctions, shiftRegister1, shiftRegi
 
 // Light show initialization
 LightShow lightShow = LightShow(arduinoEnv, ledHeart);
-const int LIGHT_SHOW_EXECUTION_COUNT = 9;
+const int LIGHT_SHOW_EXECUTION_COUNT = 6;
 LightShowExecutionContainer *executions[LIGHT_SHOW_EXECUTION_COUNT] = {
-    new LightShowExecutionContainerRepeater(arduinoEnv, new SequentialLedActivationExecution(arduinoEnv, 60, 250, 0, false, false), 3, 0.6),
-    new LightShowExecutionContainerRepeater(arduinoEnv, new SequentialLedActivationExecution(arduinoEnv, 60, 250, 0, false, true), 3, 0.6),
-    new LightShowExecutionContainerRepeater(arduinoEnv, new GlobalHeartBlinkExecution(arduinoEnv, 100, 250, 5), 25, 0.8),
+    (new LightShowExecutionContainerSequence(3, 3, 1.35))
+        ->addContainer(new SequentialLedActivationExecution(arduinoEnv, 30, 250, 0, false, false))
+        ->addContainer(new SequentialLedActivationExecution(arduinoEnv, 30, 250, 0, false, true))
+        ->addContainer(new LightShowExecutionContainerRepeater(arduinoEnv, new GlobalHeartBlinkExecution(arduinoEnv, 50, 220, 2), 5, 0.6)),
+    new LightShowExecutionContainerRepeater(arduinoEnv, new GlobalHeartBlinkExecution(arduinoEnv, 120, 250, 5), 25, 0.75),
     new LightShowExecutionContainerRepeater(arduinoEnv, new SequentialLedActivationExecution(arduinoEnv, 50, 250, 0, true, false), 50, 0.9),
-    new LightShowExecutionContainerRepeater(arduinoEnv, new RandomHeartBlinkExecution(arduinoEnv, 30, 180, 10, 5), 4, 1.2),
-    SequentialRowActivator::createDownwardsMovingRowActivator(arduinoEnv, 50, 255)->turnOffPrevious(true),
-    SequentialRowActivator::createUpwardsMovingRowActivator(arduinoEnv, 50, 255)->turnOffPrevious(false),
+    (new LightShowExecutionContainerSequence(2, 3))
+        ->addContainer((new LightShowExecutionContainerSequence(2, 3))
+                           ->addContainer(SequentialRowActivator::createUpwardsMovingRowActivator(arduinoEnv, 25, 255)->turnOffPrevious(true))
+                           ->addContainer(SequentialRowActivator::createDownwardsMovingRowActivator(arduinoEnv, 45, 255)->turnOffPrevious(false)))
+        ->addContainer(new LightShowExecutionContainerRepeater(arduinoEnv, new RandomHeartBlinkExecution(arduinoEnv, 30, 220, 3, 1), 5, 1.25)),
     SequentialRowActivator::createDownwardsMovingRowActivator(arduinoEnv, 50, 255)->withStartIndex(3)->turnOffPrevious(true),
     SequentialRowActivator::createDownwardsMovingRowActivator(arduinoEnv, 50, 255)->withStartIndex(3)->turnOffPrevious(false)};
 LightShowExecutionContainerIterator lightShowContainer = LightShowExecutionContainerIterator(executions, LIGHT_SHOW_EXECUTION_COUNT);

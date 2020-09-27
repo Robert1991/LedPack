@@ -37,6 +37,7 @@ class LightShowExecutionContainer {
  protected:
   int currentExecution = 1;
   int totalExecutions = 0;
+  int originalDelayTime;
 
   virtual void resetExtended();
   virtual void executeNextStepOn(LedHeart* heart) = 0;
@@ -49,6 +50,8 @@ class LightShowExecutionContainer {
   LightShowExecutionContainer(IArduinoWrapper* arduinoEnv, int totalExecutions, int delay, int brightnessFactor);
 
   virtual void executeOn(LedHeart* heart);
+  virtual int applyDelayFactor(float delayFactor);
+  virtual void resetDelayTime();
   bool hasAnotherExecution();
   void reset();
   int getTotalExecutions();
@@ -59,20 +62,47 @@ class LightShowExecutionContainerRepeater : public LightShowExecutionContainer {
   int repetitions = 0;
   int originalContainerDelay = 0;
   float delayFactor = 1.0;
-  int currentDelay = 0;
+  float originalDelayFactor = 1.0;
   LightShowExecutionContainer* executionContainer;
 
  protected:
   void executeNextStepOn(LedHeart* heart);
   void resetExtended();
-  int nextDelayTime();
 
  public:
   LightShowExecutionContainerRepeater(IArduinoWrapper* arduinoEnv, LightShowExecutionContainer* executionContainer, int repetitions);
   LightShowExecutionContainerRepeater(IArduinoWrapper* arduinoEnv, LightShowExecutionContainer* executionContainer, int repetitions,
                                       float delayFactor);
+  void resetDelayTime();
+  int applyDelayFactor(float delayFactor);
+  void executeOn(LedHeart* heart);
+};
+
+class LightShowExecutionContainerSequence : public LightShowExecutionContainer {
+ private:
+  int sequenceLength = 0;
+  int currentContainerIndex = 0;
+  int lastContainerAddedIndex = 0;
+  int times = 1;
+  float delayFactor = 1.0;
+  float originalDelayFactor = 1.0;
+  LightShowExecutionContainer** containerSequence;
+  int* originalContainerDelays;
+
+ protected:
+  void executeNextStepOn(LedHeart* heart);
+  void resetExtended();
+
+ public:
+  LightShowExecutionContainerSequence(int sequenceLength);
+  LightShowExecutionContainerSequence(int sequenceLength, int times);
+  LightShowExecutionContainerSequence(int sequenceLength, int times, float delayFactor);
 
   void executeOn(LedHeart* heart);
+  LightShowExecutionContainerSequence* addContainer(LightShowExecutionContainer* container);
+  LightShowExecutionContainerSequence* executeTimes(int times);
+  int applyDelayFactor(float delayFactor);
+  void resetDelayTime();
 };
 
 class LightShowExecutionContainerIterator {
