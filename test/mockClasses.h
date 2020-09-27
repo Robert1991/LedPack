@@ -105,7 +105,7 @@ class IStandardFunctionsMock : public IStandardFunctions {
 
 class LedHeartMock : public LedHeart {
  public:
-  MOCK_METHOD(void, initialize, (), ());
+  MOCK_METHOD(void, initialize, (), (override));
   MOCK_METHOD(void, turnOnAll, (), (override));
   MOCK_METHOD(void, turnOffAll, (), (override));
   MOCK_METHOD(void, turnOn, (int ledIndex), (override));

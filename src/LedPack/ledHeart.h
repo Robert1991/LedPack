@@ -59,7 +59,7 @@ class LedHeart {
   LedHeart();
   LedHeart(IStandardFunctions *stdFunctions, LedShiftRegister *leftShiftRegister, LedShiftRegister *rightShiftRegister);
 
-  void initialize();
+  virtual void initialize();
   virtual void turnOnAll();
   virtual void turnOffAll();
   virtual void turnOn(int ledIndex);
