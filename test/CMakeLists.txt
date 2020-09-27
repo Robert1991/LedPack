@@ -18,6 +18,26 @@ add_test(
     ${CMAKE_BINARY_DIR}/test/LightShow-test
   )
 
+add_executable(LightShowEffects-test
+  LightShowEffects-test.cpp
+)
+
+target_link_libraries(LightShowEffects-test
+  gtest_main
+  gmock_main
+  ledHeart
+  shiftRegister
+  arduinoWrapper
+  lightShow
+)
+
+add_test(
+  NAME
+  LightShowEffects-test
+  COMMAND
+    ${CMAKE_BINARY_DIR}/test/LightShowEffects-test
+  ) 
+
 add_executable(Gyroscope-test
   Gyroscope-test.cpp
 )
